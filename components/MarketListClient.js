@@ -1,36 +1,16 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { STATIC_MARKETS } from '../services/marketService';
+import { STATIC_MARKETS } from '../utils/constants';
 
 export default function MarketListClient({ initialResults }) {
   const [marketResults, setMarketResults] = useState(initialResults);
-  const [selectedMarket, setSelectedMarket] = useState(null);
-  const [newResult, setNewResult] = useState('');
-  const [newTime, setNewTime] = useState('');
-  const [newMessage, setNewMessage] = useState('');
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     const adminStatus = localStorage.getItem('is_admin') === 'true';
     setIsAdmin(adminStatus);
   }, []);
-
-  const handleOpenModal = (market) => {
-    if (!isAdmin) return;
-    setSelectedMarket(market);
-    const currentData = marketResults[market.name] || {};
-    setNewResult(currentData.result || '140-55-140');
-    setNewTime(currentData.time || market.time);
-    setNewMessage(currentData.message || '');
-  };
-
-  const handleCloseModal = () => {
-    setSelectedMarket(null);
-    setNewResult('');
-    setNewTime('');
-    setNewMessage('');
-  };
 
   const handleNavigation = (marketName, type) => {
     const formattedSlug = marketName.toLowerCase().replace(/\s+/g, '-');
@@ -77,22 +57,10 @@ export default function MarketListClient({ initialResults }) {
                   PANEL
                 </button>
               </div>
-
-              {isAdmin && (
-                <div className="mt-2">
-                  <button
-                    onClick={() => handleOpenModal(item)}
-                    className="bg-red-600 text-white text-[10px] font-bold px-3 py-0.5 rounded border border-red-800 shadow-sm"
-                  >
-                    ✏️ Update {item.name}
-                  </button>
-                </div>
-              )}
             </div>
           );
         })}
       </div>
     </div>
   );
-                    }
-
+}
