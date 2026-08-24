@@ -3,7 +3,7 @@
 import React, { useState } from "main"; // React ko standard import rakhein
 import { useRouter } from "next/navigation";
 import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
-import { auth } from "../lib/firebase";
+import { auth } from "../lib/firebase-admin";
 
 export default function PhoneLoginClient() {
   const router = useRouter();
