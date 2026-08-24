@@ -1,4 +1,4 @@
-// utils/constants.js
+// utils/constants.js ka
 export const STATIC_MARKETS = [
   { id: 3, name: 'SRIDEVI', time: '11:35 AM - 12:35 PM' },
   { id: 4, name: 'TIME BAZAR', time: '01:00 PM - 02:00 PM' },
