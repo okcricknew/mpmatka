@@ -1,4 +1,4 @@
-import { db } from "@/lib/firebase-admin";
+import { db } from "../lib/firebase-admin";
 
 export const dynamic = "force-dynamic"; // Yeh page ko SSR banata hai
 
@@ -12,7 +12,6 @@ async function getResults() {
     return snapshot.docs.map((doc) => {
       const data = doc.data();
       
-      // Agar Firestore Timestamp hai toh usko string ya safe format mein badlein
       let formattedDate = data.date;
       if (data.date && typeof data.date.toDate === "function") {
         formattedDate = data.date.toDate().toISOString();
@@ -26,7 +25,7 @@ async function getResults() {
     });
   } catch (error) {
     console.error("Firestore Error:", error);
-    throw error; // Catch block error throw karega taaki UI mein dikh sake
+    throw error;
   }
 }
 
