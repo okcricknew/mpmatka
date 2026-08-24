@@ -1,5 +1,5 @@
-@tailwind base;
-@tailwind components;
+@import "tailwindcss";
+@tailwind components";
 @tailwind utilities;
 * {
   box-sizing: border-box;
