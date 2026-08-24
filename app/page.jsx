@@ -1,85 +1,18 @@
-import { db } from "../lib/firebase-admin";
+import { getInitialMarketResults } from "../services/marketService";
+import MarketListClient from "../components/MarketListClient";
 
-export const dynamic = "force-dynamic"; // Yeh page ko SSR banata hai
-
-async function getResults() {
-  try {
-    const snapshot = await db
-      .collection("results")
-      .limit(50)
-      .get();
-
-    return snapshot.docs.map((doc) => {
-      const data = doc.data();
-      
-      let formattedDate = data.date;
-      if (data.date && typeof data.date.toDate === "function") {
-        formattedDate = data.date.toDate().toISOString();
-      }
-
-      return {
-        id: doc.id,
-        ...data,
-        date: formattedDate ? String(formattedDate) : null,
-      };
-    });
-  } catch (error) {
-    console.error("Firestore Error:", error);
-    throw error;
-  }
-}
+// Yeh line ensure karti hai ki yeh page strictly Server-Side Rendered (SSR) ho
+export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  let results = [];
-  let error = "";
-
-  try {
-    results = await getResults();
-  } catch (err) {
-    error = "Firestore se results load nahi ho pa rahe hain.";
-  }
+  // Server par data fetch ho raha hai (1st render mein hi load hoga)
+  const initialResults = await getInitialMarketResults();
 
   return (
-    <main style={{ padding: "20px" }}>
-      <h1>Satta Matka Results</h1>
-      <p>Latest results and updates (SSR Enabled)</p>
-
-      {error ? (
-        <section className="result-card" style={{ color: "red" }}>
-          <p>{error}</p>
-        </section>
-      ) : results.length === 0 ? (
-        <section className="result-card">
-          <p>No results available.</p>
-        </section>
-      ) : (
-        results.map((item) => (
-          <article className="result-card" key={item.id} style={{ border: "1px solid #ccc", margin: "10px 0", padding: "10px" }}>
-            <h2>{item.name || item.title || "Result"}</h2>
-
-            {item.date && (
-              <div className="result-row">
-                <strong>Date: </strong>
-                <span>{item.date}</span>
-              </div>
-            )}
-
-            {item.open && (
-              <div className="result-row">
-                <strong>Open: </strong>
-                <span>{String(item.open)}</span>
-              </div>
-            )}
-
-            {item.close && (
-              <div className="result-row">
-                <strong>Close: </strong>
-                <span>{String(item.close)}</span>
-              </div>
-            )}
-          </article>
-        ))
-      )}
+    <main style={{ padding: "10px" }}>
+      <h1 style={{ textAlign: "center", marginBottom: "15px" }}>Satta Matka Live Results</h1>
+      {/* Data ko client component mein pass kar rahe hain */}
+      <MarketListClient initialResults={initialResults} />
     </main>
   );
 }
