@@ -48,4 +48,3 @@ export async function getInitialMarketResults() {
     return fallbackMap;
   }
 }
-
