@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState } from "main"; // React ko standard import rakhein
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
-import { auth } from "../lib/firebase-admin";
+import { auth } from "../lib/firebase"; // Yahan client-side firebase import hoga
 
 export default function PhoneLoginClient() {
   const router = useRouter();
@@ -157,5 +157,4 @@ export default function PhoneLoginClient() {
       </div>
     </div>
   );
-          }
-                  
+}
