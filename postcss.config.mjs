@@ -1,3 +1,4 @@
+// postcss.cinfig.mjs
 const config = {
   plugins: {
     "@tailwindcss/postcss": {}
