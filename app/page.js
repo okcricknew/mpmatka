@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 import MarketListClient from "../components/MarketListClient";
 import { getInitialMarketResults } from "../services/marketService";
 
