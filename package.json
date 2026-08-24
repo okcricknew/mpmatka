@@ -11,6 +11,9 @@
     "firebase-admin": "^13.0.2",
     "next": "^15.5.0",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "tailwindcss": "^4.1.12",
+    "@tailwindcss/postcss": "^4.1.12",
+    "postcss": "^8.5.6"
   }
 }
