@@ -33,7 +33,7 @@ main {
   width: 100%;
   max-width: 100%;
   margin: 0 auto;
-  padding: 16px 0; /* Left-right gap hatane ke liye padding zero ki gayi hai */
+  padding: 0; /* Left-right gap hatane ke liye padding zero ki gayi hai */
   overflow-x: hidden;
 }
 
@@ -116,7 +116,7 @@ button {
 
 @media (max-width: 600px) {
   main {
-    padding: 18px 0; /* Mobile par bhi left-right gap zero rakha gaya hai */
+    padding: 0; /* Mobile par bhi left-right gap zero rakha gaya hai */
   }
 
   h1 {
