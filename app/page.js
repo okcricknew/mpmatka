@@ -12,7 +12,7 @@ export default async function HomePage() {
   return (
     <main className="w-full bg-[#f5f7fb] pb-10 overflow-x-hidden">
       {/* Market Results List & User Login Section */}
-      <div className="w-full px-2 sm:px-4 mt-2">
+      <div className="w-full px-0 mt-2">
         <MarketListClient initialResults={initialResults} />
         <UserLoginRegister />
       </div>
