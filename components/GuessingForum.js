@@ -16,10 +16,9 @@ export default function GuessingForum({ initialPosts = [] }) {
     }
   })
 
-  // isAdmin ko abhi default false ya apne custom role ke hisaab se handle kar sakte hain (subscribeAdminStatus hat gaya hai)
   const [isAdmin, setIsAdmin] = useState(false)
-
   const [user, setUser] = useState(null)
+  
   const [profileUsername, setProfileUsername] = useState(() => {
     try {
       return localStorage.getItem('guessing_profile_username') || ''
@@ -61,9 +60,6 @@ export default function GuessingForum({ initialPosts = [] }) {
               data.permissions?.add_results === true
 
             const postingAllowed = isActive && hasPermission
-
-            // Agar aap profiles collection mein hi admin role check karte hain toh yahan setIsAdmin true kar sakte hain, e.g.:
-            // if (data.role === 'admin') setIsAdmin(true)
 
             setProfileUsername(username)
             setCanPost(postingAllowed)
@@ -170,7 +166,7 @@ export default function GuessingForum({ initialPosts = [] }) {
         })
       }
 
-      // 1. Strict 3-Digit Pannas (Must be 3 digits AND NOT all repeating digits like 888, 333)
+      // 1. Strict 3-Digit Pannas
       const foundPannas = line.match(/\b\d{3}\b/g)
       if (foundPannas) {
         foundPannas.forEach(p => {
@@ -198,7 +194,7 @@ export default function GuessingForum({ initialPosts = [] }) {
         })
       }
 
-      // 3. Single or Repeating Anks (e.g., 3, 33333, 8, etc.)
+      // 3. Single or Repeating Anks
       const cleanNums = line.replace(/[^0-9\s]/g, '').trim()
       if (cleanNums && !line.includes('-') && line !== market && !upperLine.includes('OPEN') && !upperLine.includes('CLOSE')) {
         const parts = cleanNums.split(/\s+/)
@@ -278,7 +274,7 @@ export default function GuessingForum({ initialPosts = [] }) {
     if (!isAdmin || !postId) return
 
     const confirmed = window.confirm(
-      'Kya aap is post को permanently delete karna chahte hain?'
+      'Kya aap is post ko permanently delete karna chahte hain?'
     )
 
     if (!confirmed) return
@@ -536,4 +532,5 @@ export default function GuessingForum({ initialPosts = [] }) {
       </div>
     </div>
   )
-}
+  }
+    
