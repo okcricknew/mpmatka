@@ -26,14 +26,14 @@ body {
 }
 
 /* =========================
-   MAIN (Balanced Width Layout)
+   MAIN (Full Width Edge-to-Edge)
    ========================= */
 
 main {
   width: 100%;
   max-width: 100%;
-  margin: 0 auto;
-  padding: 20px 16px; /* Yahan left-right 16px padding wapas de di hai taaki zyada phaile nahi */
+  margin: 0;
+  padding: 16px 0px; /* Top-Bottom 16px rahega, lekin Left-Right padding bilkul 0 kar di hai */
   overflow-x: hidden;
 }
 
@@ -73,10 +73,10 @@ a {
 .result-card {
   background: #ffffff;
   border: 1px solid #e5e7eb;
-  border-radius: 10px;
+  border-radius: 0px; /* Edge-to-edge look ke liye rounded corners hata diye hain, agar chahiye toh 10px rakh sakte hain */
   padding: 16px;
-  margin-top: 14px;
-  box-shadow: 0 2px 8px rgb(0 0 0 / 5%);
+  margin-top: 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   width: 100%;
 }
 
@@ -116,7 +116,7 @@ button {
 
 @media (max-width: 600px) {
   main {
-    padding: 16px 12px; /* Mobile ke liye bhi safe padding set kar di hai */
+    padding: 12px 0px; /* Mobile par bhi left-right padding 0 rakhi hai taaki koi gap na aaye */
   }
 
   h1 {
