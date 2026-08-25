@@ -6,40 +6,29 @@ import { collection, onSnapshot, addDoc, serverTimestamp, doc, getDoc, deleteDoc
 import { onAuthStateChanged } from 'firebase/auth'
 
 export default function GuessingForum({ initialPosts = [] }) {
-  const [posts, setPosts] = useState(() => {
-    if (initialPosts && initialPosts.length > 0) return initialPosts
-    try {
-      const cachedPosts = localStorage.getItem('guessing_posts_cache')
-      return cachedPosts ? JSON.parse(cachedPosts) : []
-    } catch (e) {
-      return []
-    }
-  })
-
+  const [posts, setPosts] = useState(initialPosts)
   const [isAdmin, setIsAdmin] = useState(false)
   const [user, setUser] = useState(null)
-  
-  const [profileUsername, setProfileUsername] = useState(() => {
-    try {
-      return localStorage.getItem('guessing_profile_username') || ''
-    } catch (e) {
-      return ''
-    }
-  })
-
-  const [canPost, setCanPost] = useState(() => {
-    try {
-      return localStorage.getItem('guessing_can_post') === 'true'
-    } catch (e) {
-      return false
-    }
-  })
+  const [profileUsername, setProfileUsername] = useState('')
+  const [canPost, setCanPost] = useState(false)
 
   const [guessText, setGuessText] = useState('')
   const [quotingPost, setQuotingPost] = useState(null)
   const [loading, setLoading] = useState(false)
   const [showOriginalPosts, setShowOriginalPosts] = useState(true)
   const postFormRef = useRef(null)
+
+  // Safe client-side localstorage and session sync
+  useEffect(() => {
+    try {
+      const cachedPosts = localStorage.getItem('guessing_posts_cache')
+      if (cachedPosts && (!initialPosts || initialPosts.length === 0)) {
+        setPosts(JSON.parse(cachedPosts))
+      }
+      setProfileUsername(localStorage.getItem('guessing_profile_username') || '')
+      setCanPost(localStorage.getItem('guessing_can_post') === 'true')
+    } catch (e) {}
+  }, [initialPosts])
 
   useEffect(() => {
     let unsubscribePosts = null
@@ -101,7 +90,9 @@ export default function GuessingForum({ initialPosts = [] }) {
               ? item.createdAt.toMillis()
               : (item.cachedTime || Date.now())
           }))
-          localStorage.setItem('guessing_posts_cache', JSON.stringify(cacheableList))
+          try {
+            localStorage.setItem('guessing_posts_cache', JSON.stringify(cacheableList))
+          } catch (e) {}
           return list
         }
         return prev
@@ -144,7 +135,6 @@ export default function GuessingForum({ initialPosts = [] }) {
         }
       }
 
-      // 🎯 Hyphen Format Handling (e.g., 360-9, 690-5, 450-9)
       const hyphenMatches = line.match(/(\d{3})\s*-\s*(\d{1})/g)
       if (hyphenMatches) {
         hyphenMatches.forEach(hm => {
@@ -166,7 +156,6 @@ export default function GuessingForum({ initialPosts = [] }) {
         })
       }
 
-      // 1. Strict 3-Digit Pannas
       const foundPannas = line.match(/\b\d{3}\b/g)
       if (foundPannas) {
         foundPannas.forEach(p => {
@@ -180,7 +169,6 @@ export default function GuessingForum({ initialPosts = [] }) {
         })
       }
 
-      // 2. 2-Digit Numbers (Jodis)
       const foundJodis = line.match(/\b\d{2}\b/g)
       if (foundJodis) {
         foundJodis.forEach(j => {
@@ -194,7 +182,6 @@ export default function GuessingForum({ initialPosts = [] }) {
         })
       }
 
-      // 3. Single or Repeating Anks
       const cleanNums = line.replace(/[^0-9\s]/g, '').trim()
       if (cleanNums && !line.includes('-') && line !== market && !upperLine.includes('OPEN') && !upperLine.includes('CLOSE')) {
         const parts = cleanNums.split(/\s+/)
@@ -273,10 +260,7 @@ export default function GuessingForum({ initialPosts = [] }) {
   const handleDeletePost = async (postId) => {
     if (!isAdmin || !postId) return
 
-    const confirmed = window.confirm(
-      'Kya aap is post ko permanently delete karna chahte hain?'
-    )
-
+    const confirmed = window.confirm('Kya aap is post ko permanently delete karna chahte hain?')
     if (!confirmed) return
 
     try {
@@ -285,10 +269,7 @@ export default function GuessingForum({ initialPosts = [] }) {
       setPosts(prev => {
         const updated = prev.filter(post => post.id !== postId)
         try {
-          localStorage.setItem(
-            'guessing_posts_cache',
-            JSON.stringify(updated)
-          )
+          localStorage.setItem('guessing_posts_cache', JSON.stringify(updated))
         } catch (e) {}
         return updated
       })
@@ -533,4 +514,4 @@ export default function GuessingForum({ initialPosts = [] }) {
     </div>
   )
   }
-    
+                
