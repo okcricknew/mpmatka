@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /* ========================
-   GLOBAL RESETS
+   GLOBAL RESETS (Clean & Minimal)
    ======================== */
 
 * {
@@ -25,105 +25,4 @@ body {
   min-height: 100vh;
 }
 
-/* =========================
-   MAIN (Full Width Edge-to-Edge)
-   ========================= */
-
-main {
-  width: 100%;
-  max-width: 100%;
-  margin: 0;
-  padding: 0px 0px; /* Top-Bottom 16px rahega, lekin Left-Right padding bilkul 0 kar di hai */
-  overflow-x: hidden;
-}
-
-/* =========================
-   HEADINGS / TEXT
-   ========================= */
-
-h1,
-h2,
-h3,
-p {
-  margin-top: 0;
-}
-
-h1 {
-  margin-bottom: 8px;
-  color: #111827;
-}
-
-p {
-  color: #4b5563;
-}
-
-/* =========================
-   LINKS
-   ========================= */
-
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-/* =========================
-   RESULT CARD
-   ========================= */
-
-.result-card {
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 0px; /* Edge-to-edge look ke liye rounded corners hata diye hain, agar chahiye toh 10px rakh sakte hain */
-  padding: 16px;
-  margin-top: 10px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  width: 100%;
-}
-
-.result-card h2 {
-  margin-bottom: 8px;
-  color: #b91c1c;
-}
-
-/* =========================
-   RESULT ROW
-   ========================= */
-
-.result-row {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 8px 0;
-  border-bottom: 1px solid #f1f5f9;
-  width: 100%;
-}
-
-.result-row:last-child {
-  border-bottom: 0;
-}
-
-/* =========================
-   BUTTON RESET
-   ========================= */
-
-button {
-  font-family: inherit;
-}
-
-/* =========================
-   MOBILE RESPONSIVE
-   ========================= */
-
-@media (max-width: 600px) {
-  main {
-    padding: 0px 0px; /* Mobile par bhi left-right padding 0 rakhi hai taaki koi gap na aaye */
-  }
-
-  h1 {
-    font-size: 26px;
-  }
-
-  .result-row {
-    display: block;
-  }
-}
+/* Ab baki sari styling aur spacing Tailwind classes (jaise w-full, px-4, py-2) khud sambhal legi! */
