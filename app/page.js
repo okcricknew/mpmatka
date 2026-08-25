@@ -10,7 +10,7 @@ export default async function HomePage() {
   const initialResults = await getInitialMarketResults();
 
   return (
-    <main className="min-h-screen bg-[#f5f7fb] pb-10 w-full overflow-x-hidden">
+    <main>
       {/* Top Header with Navigation Buttons */}
 
       {/* Market Results List */}
