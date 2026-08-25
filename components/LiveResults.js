@@ -1,4 +1,4 @@
-import { db } from '../firebase';
+import { db } from '..lib/firebase-admin';
 import { collection, getDocs } from 'firebase/firestore';
 
 const STATIC_MARKETS = [
