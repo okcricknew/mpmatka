@@ -1,5 +1,5 @@
 import GuessingForum from '../../components/GuessingForum';
-import { db } from '../../lib/firebase-admin'; // Aapka Firebase Admin SDK config
+import { db } from '../../lib/firebase-admin'; // Aapka Firebase Admin SDK configer
 
 async function getInitialPosts() {
   try {
