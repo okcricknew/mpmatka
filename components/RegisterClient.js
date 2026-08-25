@@ -1,0 +1,115 @@
+"use client";
+
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../lib/firebase";
+
+export default function RegisterClient() {
+  const router = useRouter();
+  const [username, setUsername] = useState("");
+  const [phone, setPhone] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    setError("");
+
+    if (phone.length !== 10) {
+      setError("Please enter a valid 10-digit mobile number.");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const fakeEmail = `${phone}@mpmatka.com`;
+      await createUserWithEmailAndPassword(auth, fakeEmail, password);
+      router.push("/");
+      router.refresh();
+    } catch (err) {
+      console.error(err);
+      setError(err.message || "Registration failed. Try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="flex justify-center items-center px-4">
+      <div className="bg-white w-full max-w-md rounded-lg border-2 border-red-600 p-6 shadow-xl">
+        <h2 className="text-xl font-bold text-blue-900 text-center border-b pb-2 mb-4">
+          Register New Account
+        </h2>
+
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded text-xs mb-3">
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleRegister} className="space-y-4">
+          <div>
+            <label className="block text-xs font-bold text-black mb-1">Username</label>
+            <input
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="Enter your username"
+              required
+              className="w-full border border-gray-400 rounded p-2 text-sm font-semibold text-black"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-black mb-1">Mobile Number</label>
+            <div className="flex">
+              <span className="inline-flex items-center px-3 border border-r-0 border-gray-400 bg-gray-100 text-black text-sm font-bold rounded-l">
+                +91
+              </span>
+              <input
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="Enter 10 digit number"
+                maxLength={10}
+                required
+                className="w-full border border-gray-400 rounded-r p-2 text-sm font-semibold text-black"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-black mb-1">Password</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter password (min 6 chars)"
+              required
+              className="w-full border border-gray-400 rounded p-2 text-sm font-semibold text-black"
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 rounded text-sm disabled:opacity-50"
+          >
+            {loading ? "Registering..." : "Register"}
+          </button>
+        </form>
+
+        <p className="text-center text-xs text-gray-600 mt-4">
+          Already have an account?{" "}
+          <a href="/login" className="text-blue-900 font-bold hover:underline">
+            Login here
+          </a>
+        </p>
+      </div>
+    </div>
+  );
+}
+
