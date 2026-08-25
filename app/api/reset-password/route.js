@@ -2,15 +2,20 @@ import { NextResponse } from 'next/server';
 import { initializeApp, getApps, cert } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 
-// Firebase Admin initialize karein (Vercel env variables se)
 if (!getApps().length) {
-  initializeApp({
-    credential: cert({
-      projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_ADMIN_CLIENT_EMAIL,
-      privateKey: process.env.FIREBASE_ADMIN_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-    }),
-  });
+  const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
+  const clientEmail = process.env.FIREBASE_ADMIN_CLIENT_EMAIL;
+  const privateKey = process.env.FIREBASE_ADMIN_PRIVATE_KEY;
+
+  if (projectId && clientEmail && privateKey) {
+    initializeApp({
+      credential: cert({
+        projectId,
+        clientEmail,
+        privateKey: privateKey.replace(/\\n/g, '\n'),
+      }),
+    });
+  }
 }
 
 export async function POST(request) {
@@ -21,14 +26,16 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Invalid details provided.' }, { status: 400 });
     }
 
+    if (!getApps().length) {
+      return NextResponse.json({ error: 'Server configuration error (Firebase Admin missing).' }, { status: 500 });
+    }
+
     const fakeEmail = `${phone}@mpmatka.com`;
     const authAdmin = getAuth();
 
     try {
-      // 1. Check karein user exist karta hai ya nahi
       const userRecord = await authAdmin.getUserByEmail(fakeEmail);
 
-      // 2. Uski user ka password update kar dein
       await authAdmin.updateUser(userRecord.uid, {
         password: newPassword,
       });
