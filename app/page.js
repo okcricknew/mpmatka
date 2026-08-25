@@ -5,6 +5,7 @@ import MarketListClient from "../components/MarketListClient";
 import { getInitialMarketResults } from "../services/marketService";
 import UserLoginRegister from "../components/UserLoginRegister";
 import LiveResults from "../components/LiveResults";
+import GamesAndChartsZone from "../components/GamesAndChartsZone";
 
 export default async function HomePage() {
   const initialResults = await getInitialMarketResults();
@@ -16,6 +17,7 @@ export default async function HomePage() {
     <LiveResults />
         <MarketListClient initialResults={initialResults} />
         <UserLoginRegister />
+    <GamesAndChartsZone />
       </div>
     </main>
   );
