@@ -26,14 +26,14 @@ body {
 }
 
 /* =========================
-   MAIN (Full Width Layout)
+   MAIN (Balanced Width Layout)
    ========================= */
 
 main {
   width: 100%;
   max-width: 100%;
   margin: 0 auto;
-  padding: 0; /* Left-right gap hatane ke liye padding zero ki gayi hai */
+  padding: 20px 16px; /* Yahan left-right 16px padding wapas de di hai taaki zyada phaile nahi */
   overflow-x: hidden;
 }
 
@@ -116,7 +116,7 @@ button {
 
 @media (max-width: 600px) {
   main {
-    padding: 0; /* Mobile par bhi left-right gap zero rakha gaya hai */
+    padding: 16px 12px; /* Mobile ke liye bhi safe padding set kar di hai */
   }
 
   h1 {
