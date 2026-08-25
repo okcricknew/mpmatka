@@ -2,8 +2,6 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { getAuth, signInWithEmailAndPassword, updatePassword } from "firebase/auth";
-import { auth } from "../lib/firebase";
 
 export default function ForgotPasswordClient() {
   const router = useRouter();
@@ -13,7 +11,7 @@ export default function ForgotPasswordClient() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleDirectReset = async (e) => {
+  const handleReset = async (e) => {
     e.preventDefault();
     setError("");
     setMessage("");
@@ -31,23 +29,26 @@ export default function ForgotPasswordClient() {
     setLoading(true);
 
     try {
-      const fakeEmail = `${phone}@mpmatka.com`;
+      const res = await fetch("/api/reset-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone, newPassword }),
+      });
 
-      // 1. Pehle user ko temporarily login karwayenge ya check karenge ki account exist karta hai
-      // Note: Direct password update ke liye Firebase mein user ka currently signed-in hona zaroori hota hai.
-      // Agar user logged-in nahi hai, toh hum Admin SDK ya custom verification use karte hain.
-      
-      // Lekin client-side par bina login ke password change karne ke liye hum 
-      // Firebase ka confirmPasswordReset ya custom flow use kar sakte hain.
-      
-      setMessage("Password updated successfully! You can login now.");
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to reset password.");
+      }
+
+      setMessage("Password updated successfully! Redirecting to login...");
       setTimeout(() => {
         router.push("/login");
       }, 2000);
 
     } catch (err) {
       console.error(err);
-      setError("Failed to update password. Please check your mobile number.");
+      setError(err.message || "Something went wrong.");
     } finally {
       setLoading(false);
     }
@@ -57,7 +58,7 @@ export default function ForgotPasswordClient() {
     <div className="flex justify-center items-center px-4">
       <div className="bg-white w-full max-w-md rounded-lg border-2 border-red-600 p-6 shadow-xl">
         <h2 className="text-xl font-bold text-blue-900 text-center border-b pb-2 mb-4">
-          Reset Password Directly
+          Reset Password
         </h2>
 
         {error && (
@@ -72,11 +73,9 @@ export default function ForgotPasswordClient() {
           </div>
         )}
 
-        <form onSubmit={handleDirectReset} className="space-y-4">
+        <form onSubmit={handleReset} className="space-y-4">
           <div>
-            <label className="block text-xs font-bold text-black mb-1">
-              Registered Mobile Number
-            </label>
+            <label className="block text-xs font-bold text-black mb-1">Registered Mobile Number</label>
             <div className="flex">
               <span className="inline-flex items-center px-3 border border-r-0 border-gray-400 bg-gray-100 text-black text-sm font-bold rounded-l">
                 +91
@@ -94,9 +93,7 @@ export default function ForgotPasswordClient() {
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-black mb-1">
-              New Password
-            </label>
+            <label className="block text-xs font-bold text-black mb-1">New Password</label>
             <input
               type="password"
               value={newPassword}
