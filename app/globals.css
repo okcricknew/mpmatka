@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /* =========================
-   GLOBAL RESETs
+   GLOBAL RESETS
    ========================= */
 
 * {
@@ -9,7 +9,8 @@
 }
 
 html,
-body {
+body,
+#__next {
   margin: 0;
   padding: 0;
   width: 100%;
@@ -24,23 +25,12 @@ body {
 }
 
 /* =========================
-   NEXT.JS ROOT
-   ========================= */
-
-html,
-body,
-#__next {
-  width: 100%;
-  min-height: 100%;
-}
-
-/* =========================
-   MAIN
+   MAIN (Full Width Layout)
    ========================= */
 
 main {
   width: 100%;
-  max-width: 1000px;
+  max-width: 100%; /* Desktop aur mobile dono par full width ke liye */
   margin: 0 auto;
   padding: 24px 16px;
 }
@@ -85,6 +75,7 @@ a {
   padding: 16px;
   margin-top: 14px;
   box-shadow: 0 2px 8px rgb(0 0 0 / 5%);
+  width: 100%;
 }
 
 .result-card h2 {
@@ -102,6 +93,7 @@ a {
   gap: 12px;
   padding: 8px 0;
   border-bottom: 1px solid #f1f5f9;
+  width: 100%;
 }
 
 .result-row:last-child {
@@ -117,7 +109,7 @@ button {
 }
 
 /* =========================
-   MOBILE
+   MOBILE RESPONSIVE
    ========================= */
 
 @media (max-width: 600px) {
