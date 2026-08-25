@@ -1,5 +1,4 @@
-import { db } from '..lib/firebase-admin';
-import { collection, getDocs } from 'firebase/firestore';
+import { db } from './lib/firebase-admin';
 
 const STATIC_MARKETS = [
   {
@@ -99,13 +98,14 @@ const timeToMinutes = (time) => {
 };
 
 // ======================================================
-// FETCH DATA FOR SSR
+// FETCH DATA FOR SSR (Using Firebase Admin .get())
 // ======================================================
 async function getLiveResults() {
   try {
-    const querySnapshot = await getDocs(collection(db, 'results'));
+    const snapshot = await db.collection('results').get();
     const liveMap = {};
-    querySnapshot.forEach((docSnap) => {
+    
+    snapshot.forEach((docSnap) => {
       const docData = docSnap.data();
       if (!docData || !docData.name) return;
 
@@ -117,7 +117,7 @@ async function getLiveResults() {
     });
     return liveMap;
   } catch (error) {
-    console.error('Firebase SSR fetch error:', error);
+    console.error('Firebase Admin SSR fetch error:', error);
     return {};
   }
 }
@@ -278,5 +278,4 @@ export default async function LiveResults() {
       </div>
     </div>
   );
-    }
-       
+         }
