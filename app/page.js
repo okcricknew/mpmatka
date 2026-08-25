@@ -10,7 +10,7 @@ export default async function HomePage() {
   const initialResults = await getInitialMarketResults();
 
   return (
-    <main className="w-full bg-[#f5f7fb] pb-10 px-0 overflow-x-hidden">
+    <main className="w-full bg-[#f5f7fb] pb-10 px-1 overflow-x-hidden">
       {/* Market Results List & User Login Section */}
       <div className="w-full px-0 mt-2">
         <MarketListClient initialResults={initialResults} />
