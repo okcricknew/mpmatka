@@ -1,4 +1,5 @@
 import { db } from '../lib/firebase-admin';
+import { revalidatePath } from 'next/cache';
 
 const STATIC_MARKETS = [
   {
@@ -211,6 +212,14 @@ const getCurrentSlot = (market) => {
 };
 
 // ======================================================
+// SERVER ACTION (Bina page reload kiye data re-fetch karega)
+// ======================================================
+async function refreshMarketAction() {
+  'use server';
+  revalidatePath('/'); // Isse sirf is component ka data background mein update ho jayega
+}
+
+// ======================================================
 // MAIN SSR COMPONENT
 // ======================================================
 export default async function LiveResults() {
@@ -272,10 +281,20 @@ export default async function LiveResults() {
               <div className="text-black font-extrabold text-[18px] tracking-widest mb-2">
                 <span className="text-red-600">{displayResult}</span>
               </div>
+
+              {/* Refresh Button using Server Action */}
+              <form action={refreshMarketAction}>
+                <button
+                  type="submit"
+                  className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-1 px-3 rounded-full border border-gray-300 transition-all flex items-center gap-1 shadow-sm active:scale-95 cursor-pointer mt-1"
+                >
+                  <span>🔄 Refresh</span>
+                </button>
+              </form>
             </div>
           );
         })}
       </div>
     </div>
   );
-                        }
+    }
