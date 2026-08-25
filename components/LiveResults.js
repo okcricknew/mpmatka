@@ -286,7 +286,7 @@ export default async function LiveResults() {
               <form action={refreshMarketAction}>
                 <button
                   type="submit"
-                  className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-1 px-3 rounded-full border border-gray-300 transition-all flex items-center gap-1 shadow-sm active:scale-95 cursor-pointer mt-1"
+                  className="text-xs bg-red-100 hover:bg-red-200 text-white-700 font-semibold py-1 px-3 rounded-full border border-red-300 transition-all flex items-center gap-1 shadow-sm active:scale-95 cursor-pointer mt-1"
                 >
                   <span>🔄 Refresh</span>
                 </button>
