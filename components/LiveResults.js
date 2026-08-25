@@ -1,4 +1,4 @@
-import { db } from './lib/firebase-admin';
+import { db } from '../lib/firebase-admin';
 
 const STATIC_MARKETS = [
   {
