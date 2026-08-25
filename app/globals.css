@@ -32,7 +32,9 @@ main {
   width: 100%;
   max-width: 100%; /* Desktop aur mobile dono par full width ke liye */
   margin: 0 auto;
-  padding: 24px 16px;
+  padding: 16px 0;
+   overflow-x: hidden;
+}
 }
 
 /* =========================
