@@ -10,7 +10,7 @@ export async function getInitialMarketResults() {
   STATIC_MARKETS.forEach((market) => {
     resultsMap[market.name] = {
       name: market.name,
-      result: "140-55-140",
+      result: "Loading...",
       time: market.time,
       message: "",
     };
