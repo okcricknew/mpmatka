@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { auth, db } from '@/lib/firebase' // Absolute path safe loading ke liye
+import { auth, db } from '../lib/firebase' // Absolute path safe loading ke liye
 import { onAuthStateChanged, signOut } from 'firebase/auth'
 import { doc, getDoc } from 'firebase/firestore'
 
