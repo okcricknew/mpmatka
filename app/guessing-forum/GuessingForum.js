@@ -11,6 +11,7 @@ export default function GuessingForum({ initialPosts }) {
   const [user, setUser] = useState(null)
   const [profileUsername, setProfileUsername] = useState('')
   const [canPost, setCanPost] = useState(false)
+  const [isAdmin, setIsAdmin] = useState(false)
 
   const [guessText, setGuessText] = useState('')
   const [quotingPost, setQuotingPost] = useState(null)
@@ -45,20 +46,29 @@ export default function GuessingForum({ initialPosts }) {
           if (userDoc.exists()) {
             const data = userDoc.data()
             const username = data.username || ''
-            const isActive = data.is_approved === true
-            const hasPermission =
-              data.permissions?.market_update === true ||
-              data.permissions?.add_results === true
+            
+            // ========================================================
+            // FIX: String aur Boolean dono check karega ("true" ya true)
+            // ========================================================
+            const isActive = data.is_approved === true || data.is_approved === 'true'
+            const isRoleAdmin = data.role === 'admin' || data.is_admin === true || data.is_admin === 'true'
+            
+            const hasMarketPermission = data.permissions?.market_update === true || data.permissions?.market_update === 'true'
+            const hasResultsPermission = data.permissions?.add_results === true || data.permissions?.add_results === 'true'
+            const hasGuessingPermission = data.permissions?.guessing_forum === true || data.permissions?.guessing_forum === 'true'
 
-            const postingAllowed = isActive && hasPermission
+            // Agar Admin hai YA (Approved + Permitted) hai toh permission milega
+            const postingAllowed = isRoleAdmin || (isActive && (hasMarketPermission || hasResultsPermission || hasGuessingPermission))
 
             setProfileUsername(username)
             setCanPost(postingAllowed)
+            setIsAdmin(isRoleAdmin)
 
             localStorage.setItem('guessing_profile_username', username)
             localStorage.setItem('guessing_can_post', postingAllowed ? 'true' : 'false')
           } else {
             setCanPost(false)
+            setIsAdmin(false)
             localStorage.setItem('guessing_can_post', 'false')
           }
         } catch (err) {
@@ -66,6 +76,7 @@ export default function GuessingForum({ initialPosts }) {
         }
       } else {
         setCanPost(false)
+        setIsAdmin(false)
         setProfileUsername('')
         localStorage.removeItem('guessing_profile_username')
         localStorage.setItem('guessing_can_post', 'false')
@@ -371,6 +382,8 @@ export default function GuessingForum({ initialPosts }) {
             .filter((post) => showOriginalPosts || !post.quotes?.length)
             .map((post) => {
               const hasQuotes = post.quotes && post.quotes.length > 0;
+              const isOwnerOrAdmin = isAdmin || (user && user.uid === post.userId);
+
               return (
                 <div key={post.id} className="w-full bg-white border-[3px] border-orange-400 shadow-sm [border-style:groove]">
                   
@@ -457,15 +470,19 @@ export default function GuessingForum({ initialPosts }) {
                   </div>
 
                   <div className="grid grid-cols-12 text-xs font-bold">
-                    <div className="col-span-6 bg-[#00b000] text-white py-1.5 px-2 text-sm flex items-center justify-between border-r border-orange-400 cursor-pointer hover:underline [border-style:groove]">
-                      <span onClick={() => {}}>My Profile</span>
+                    <div className="col-span-6 bg-[#00b000] text-white py-1.5 px-2 text-sm flex items-center justify-between border-r border-orange-400 [border-style:groove]">
+                      <span>My Profile</span>
 
-                      <div
-                        onClick={() => handleDeletePost(post.id)}
-                        className="text-white text-sm font-bold hover:underline"
-                      >
-                        [ DELETE ]
-                      </div>
+                      {/* Sirf Owner ya Admin ko DELETE button dikhega */}
+                      {isOwnerOrAdmin && (
+                        <button
+                          type="button"
+                          onClick={() => handleDeletePost(post.id)}
+                          className="text-white text-sm font-bold hover:underline"
+                        >
+                          [ DELETE ]
+                        </button>
+                      )}
                     </div>
             
                     <div 
@@ -489,5 +506,5 @@ export default function GuessingForum({ initialPosts }) {
       </div>
     </div>
   )
-      }
-          
+                  }
+              
