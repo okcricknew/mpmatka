@@ -1,18 +1,16 @@
 'use client'
 
 import React, { useState, useEffect, useRef } from 'react'
-import { db, auth } from '../../lib/firebase'
+import { db, auth } from '../firebase'
 import { collection, onSnapshot, addDoc, serverTimestamp, doc, getDoc, deleteDoc } from 'firebase/firestore'
 import { onAuthStateChanged } from 'firebase/auth'
 
 export default function GuessingForum() {
-  // Start with empty states to prevent SSR Hydration Mismatch & UI Flickering
+  const [mounted, setMounted] = useState(false)
   const [posts, setPosts] = useState([])
-  const [isAdmin, setIsAdmin] = useState(false)
   const [user, setUser] = useState(null)
   const [profileUsername, setProfileUsername] = useState('')
   const [canPost, setCanPost] = useState(false)
-  const [isClient, setIsClient] = useState(false)
 
   const [guessText, setGuessText] = useState('')
   const [quotingPost, setQuotingPost] = useState(null)
@@ -20,9 +18,9 @@ export default function GuessingForum() {
   const [showOriginalPosts, setShowOriginalPosts] = useState(true)
   const postFormRef = useRef(null)
 
-  // Safe LocalStorage Load after component mounts on client side
+  // Safe client-side local storage loading
   useEffect(() => {
-    setIsClient(true)
+    setMounted(true)
     try {
       const cachedPosts = localStorage.getItem('guessing_posts_cache')
       if (cachedPosts) setPosts(JSON.parse(cachedPosts))
@@ -32,12 +30,12 @@ export default function GuessingForum() {
 
       const cachedCanPost = localStorage.getItem('guessing_can_post')
       if (cachedCanPost) setCanPost(cachedCanPost === 'true')
-    } catch (e) {
-      console.error("Local storage read error:", e)
-    }
+    } catch (e) {}
   }, [])
 
+  // Firebase Auth & Realtime Firestore Listener
   useEffect(() => {
+    if (!mounted) return
     let unsubscribePosts = null
 
     const unsubscribeAuth = onAuthStateChanged(auth, async (currentUser) => {
@@ -77,8 +75,6 @@ export default function GuessingForum() {
       }
     })
 
-    const unsubscribeAdmin = subscribeAdminStatus(setIsAdmin)
-
     unsubscribePosts = onSnapshot(collection(db, 'guessing_posts'), (snapshot) => {
       const list = []
       snapshot.forEach(docSnap => {
@@ -112,10 +108,9 @@ export default function GuessingForum() {
 
     return () => {
       unsubscribeAuth()
-      unsubscribeAdmin()
       if (unsubscribePosts) unsubscribePosts()
     }
-  }, [])
+  }, [mounted])
 
   const parseGuessText = (text) => {
     const normalizedText = text.replace(/__+/g, ' ')
@@ -267,7 +262,7 @@ export default function GuessingForum() {
   }
 
   const handleDeletePost = async (postId) => {
-    if (!isAdmin || !postId) return
+    if (!postId) return
 
     const confirmed = window.confirm('Kya aap is post ko permanently delete karna chahte hain?')
     if (!confirmed) return
@@ -317,9 +312,8 @@ export default function GuessingForum() {
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' })
   const scrollToBottom = () => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' })
 
-  // Prevent rendering mismatch until client-side hydration completes
-  if (!isClient) {
-    return <div className="p-4 text-center text-xs font-bold">Loading Forum...</div>
+  if (!mounted) {
+    return <div className="w-full mt-2 bg-white font-sans text-sm p-4 text-center">Loading Forum...</div>
   }
 
   return (
@@ -495,14 +489,12 @@ export default function GuessingForum() {
                     <div className="col-span-6 bg-[#00b000] text-white py-1.5 px-2 text-sm flex items-center justify-between border-r border-orange-400 cursor-pointer hover:underline [border-style:groove]">
                       <span onClick={() => {}}>My Profile</span>
 
-                      {isAdmin && (
-                        <div
-                          onClick={() => handleDeletePost(post.id)}
-                          className="text-white text-sm font-bold hover:underline"
-                        >
-                          [ DELETE ]
-                        </div>
-                      )}
+                      <div
+                        onClick={() => handleDeletePost(post.id)}
+                        className="text-white text-sm font-bold hover:underline"
+                      >
+                        [ DELETE ]
+                      </div>
                     </div>
             
                     <div 
@@ -526,4 +518,5 @@ export default function GuessingForum() {
       </div>
     </div>
   )
-}
+    }
+    
