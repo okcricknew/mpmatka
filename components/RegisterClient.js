@@ -26,23 +26,30 @@ export default function RegisterClient() {
     const cleanUsername = username.trim();
     const cleanPhone = phone.replace(/\D/g, "");
 
-    // Username Validation
+    // ==============================
+    // USERNAME VALIDATION
+    // ==============================
     if (!cleanUsername) {
       setError("Please enter your username.");
       return;
     }
+
     if (cleanUsername.length < 3) {
       setError("Username must be at least 3 characters.");
       return;
     }
 
-    // Mobile Validation
+    // ==============================
+    // MOBILE VALIDATION
+    // ==============================
     if (!/^[6-9]\d{9}$/.test(cleanPhone)) {
       setError("Please enter a valid 10-digit mobile number.");
       return;
     }
 
-    // Password Validation
+    // ==============================
+    // PASSWORD VALIDATION
+    // ==============================
     if (password.length < 6) {
       setError("Password must be at least 6 characters.");
       return;
@@ -51,9 +58,11 @@ export default function RegisterClient() {
     setLoading(true);
 
     try {
+      // ==========================================
+      // FIREBASE AUTH CREATION
+      // ==========================================
       const fakeEmail = `${cleanPhone}@mpmatka.com`;
 
-      // 1. Create User in Firebase Auth
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         fakeEmail,
@@ -62,13 +71,16 @@ export default function RegisterClient() {
 
       const user = userCredential.user;
 
-      // 2. Save Profile in Firestore (Default is_approved: false)
+      // ==========================================
+      // FIRESTORE PROFILE CREATION
+      // profiles/{uid}
+      // ==========================================
       await setDoc(doc(db, "profiles", user.uid), {
         uid: user.uid,
         username: cleanUsername,
         phone: cleanPhone,
         email: fakeEmail,
-        is_approved: false, // New user is locked until approved by admin
+        is_approved: false, // Default locked until admin approves
         is_admin: false,
         permissions: {
           market_update: false,
@@ -77,8 +89,11 @@ export default function RegisterClient() {
         createdAt: serverTimestamp(),
       });
 
+      // ==========================================
+      // SUCCESS STATE & REDIRECT
+      // ==========================================
       setSuccessMsg("Registration successful! Account pending admin approval.");
-      
+
       setTimeout(() => {
         router.push("/login");
         router.refresh();
@@ -96,7 +111,7 @@ export default function RegisterClient() {
       } else if (err?.code === "auth/weak-password") {
         message = "Password must be at least 6 characters.";
       } else if (err?.code === "auth/network-request-failed") {
-        message = "Network error. Please check your connection.";
+        message = "Network error. Please check your internet connection.";
       } else if (err?.code === "permission-denied") {
         message = "Permission denied. Check your Firestore Security Rules.";
       } else if (err?.message) {
@@ -116,14 +131,14 @@ export default function RegisterClient() {
           Register New Account
         </h2>
 
-        {/* ERROR MESSAGE */}
+        {/* ERROR ALERT */}
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded text-xs mb-3 font-semibold">
             {error}
           </div>
         )}
 
-        {/* SUCCESS MESSAGE */}
+        {/* SUCCESS ALERT */}
         {successMsg && (
           <div className="bg-green-100 border border-green-400 text-green-700 px-3 py-2 rounded text-xs mb-3 font-semibold">
             {successMsg}
@@ -131,6 +146,7 @@ export default function RegisterClient() {
         )}
 
         <form onSubmit={handleRegister} className="space-y-4">
+          {/* USERNAME */}
           <div>
             <label className="block text-xs font-bold text-black mb-1">
               Username
@@ -142,10 +158,11 @@ export default function RegisterClient() {
               placeholder="Enter your username"
               required
               disabled={loading}
-              className="w-full border border-gray-400 rounded p-2 text-sm font-semibold text-black bg-white"
+              className="w-full border border-gray-400 rounded p-2 text-sm font-semibold text-black bg-white outline-none focus:border-red-600"
             />
           </div>
 
+          {/* MOBILE NUMBER */}
           <div>
             <label className="block text-xs font-bold text-black mb-1">
               Mobile Number
@@ -166,11 +183,12 @@ export default function RegisterClient() {
                 maxLength={10}
                 required
                 disabled={loading}
-                className="w-full border border-gray-400 rounded-r p-2 text-sm font-semibold text-black bg-white"
+                className="w-full border border-gray-400 rounded-r p-2 text-sm font-semibold text-black bg-white outline-none focus:border-red-600"
               />
             </div>
           </div>
 
+          {/* PASSWORD */}
           <div>
             <label className="block text-xs font-bold text-black mb-1">
               Password
@@ -183,19 +201,21 @@ export default function RegisterClient() {
               required
               minLength={6}
               disabled={loading}
-              className="w-full border border-gray-400 rounded p-2 text-sm font-semibold text-black bg-white"
+              className="w-full border border-gray-400 rounded p-2 text-sm font-semibold text-black bg-white outline-none focus:border-red-600"
             />
           </div>
 
+          {/* SUBMIT BUTTON */}
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 rounded text-sm disabled:opacity-50 transition-colors"
+            className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 rounded text-sm disabled:opacity-50 transition-colors shadow"
           >
             {loading ? "Registering..." : "Register"}
           </button>
         </form>
 
+        {/* LOGIN LINK */}
         <p className="text-center text-xs text-gray-600 mt-4">
           Already have an account?{" "}
           <a href="/login" className="text-blue-900 font-bold hover:underline">
@@ -205,4 +225,4 @@ export default function RegisterClient() {
       </div>
     </div>
   );
-                }
+          }
