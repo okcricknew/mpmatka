@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { auth, db } from '../lib/firebase' // Apne firebase path ke hisab se adjust karein
+import { auth, db } from '@/lib/firebase' // Absolute path safe loading ke liye
 import { onAuthStateChanged, signOut } from 'firebase/auth'
 import { doc, getDoc } from 'firebase/firestore'
 
@@ -11,28 +11,39 @@ export default function UserLoginSection() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      setUser(currentUser)
+    let isMounted = true
 
-      if (currentUser) {
-        try {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      try {
+        if (!isMounted) return
+
+        setUser(currentUser)
+
+        if (currentUser) {
           const userDocRef = doc(db, 'profiles', currentUser.uid)
           const userDoc = await getDoc(userDocRef)
 
-          if (userDoc.exists()) {
+          if (userDoc.exists() && isMounted) {
             setProfile(userDoc.data())
+          } else if (isMounted) {
+            setProfile(null)
           }
-        } catch (error) {
-          console.error("Error fetching profile in LoginSection:", error)
+        } else if (isMounted) {
+          setProfile(null)
         }
-      } else {
-        setProfile(null)
+      } catch (error) {
+        console.error("Error in UserLoginSection Auth:", error)
+      } finally {
+        if (isMounted) {
+          setLoading(false) // Guarantee karta hai ki loading state 100% remove hoga
+        }
       }
-
-      setLoading(false)
     })
 
-    return () => unsubscribe()
+    return () => {
+      isMounted = false
+      unsubscribe()
+    }
   }, [])
 
   const handleLogout = async () => {
@@ -45,19 +56,19 @@ export default function UserLoginSection() {
     }
   }
 
-  // Boolean helper function
-  const checkIsApproved = (val) => val === true || val === 'true';
+  // Boolean/String Checker Helper
+  const checkIsApproved = (val) => val === true || val === 'true'
 
   if (loading) {
     return (
-      <div className="w-full bg-white border-2 border-[#5c245c] rounded-[4px] py-3 text-center text-xs font-bold text-gray-500">
+      <div className="w-full bg-white border-2 border-[#5c245c] rounded-[4px] py-3 text-center text-xs font-bold text-gray-500 animate-pulse">
         Checking Auth State...
       </div>
     )
   }
 
-  // Check if active: role admin ho YA is_approved true ho
-  const isActive = profile ? (profile.role === 'admin' || checkIsApproved(profile.is_approved)) : false;
+  // Active User logic check
+  const isActive = profile ? (profile.role === 'admin' || checkIsApproved(profile.is_approved)) : false
 
   return (
     <div className="w-full bg-white border-2 border-[#5c245c] rounded-[4px] overflow-hidden my-3 shadow-sm">
@@ -66,7 +77,7 @@ export default function UserLoginSection() {
         ✻ USER PANEL ✻
       </div>
 
-      {/* Container */}
+      {/* Main Panel View */}
       {user ? (
         /* LOGGED IN USER VIEW */
         <div className="p-3 bg-white flex flex-col md:flex-row items-center justify-between gap-2 border-t border-gray-200">
