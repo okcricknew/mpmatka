@@ -19,16 +19,9 @@ export default function GuessingForum({ initialPosts }) {
   const [showOriginalPosts, setShowOriginalPosts] = useState(true)
   const postFormRef = useRef(null)
 
-  // Safe client-side local storage loading
+  // Client mounting set
   useEffect(() => {
     setMounted(true)
-    try {
-      const cachedUsername = localStorage.getItem('guessing_profile_username')
-      if (cachedUsername) setProfileUsername(cachedUsername)
-
-      const cachedCanPost = localStorage.getItem('guessing_can_post')
-      if (cachedCanPost) setCanPost(cachedCanPost === 'true')
-    } catch (e) {}
   }, [])
 
   // Firebase Auth & Realtime Firestore Listener
@@ -47,29 +40,32 @@ export default function GuessingForum({ initialPosts }) {
             const data = userDoc.data()
             const username = data.username || ''
             
-            // ========================================================
-            // FIX: String aur Boolean dono check karega ("true" ya true)
-            // ========================================================
-            const isActive = data.is_approved === true || data.is_approved === 'true'
-            const isRoleAdmin = data.role === 'admin' || data.is_admin === true || data.is_admin === 'true'
-            
-            const hasMarketPermission = data.permissions?.market_update === true || data.permissions?.market_update === 'true'
-            const hasResultsPermission = data.permissions?.add_results === true || data.permissions?.add_results === 'true'
-            const hasGuessingPermission = data.permissions?.guessing_forum === true || data.permissions?.guessing_forum === 'true'
+            // Helper function jo boolean aur String "true" dono handle karti hai
+            const checkPerm = (val) => val === true || val === 'true';
 
-            // Agar Admin hai YA (Approved + Permitted) hai toh permission milega
-            const postingAllowed = isRoleAdmin || (isActive && (hasMarketPermission || hasResultsPermission || hasGuessingPermission))
+            // Check Active / Approved Status
+            const isActive = checkPerm(data.is_approved)
+            const isRoleAdmin = data.role === 'admin' || checkPerm(data.is_admin)
+
+            // Dynamic Permission Check (Nested Object ya Direct Field dono check karega)
+            const hasGuessingPerm = checkPerm(data.permissions?.guessing_forum) || checkPerm(data.guessing_forum)
+            const hasMarketPerm = checkPerm(data.permissions?.market_update) || checkPerm(data.market_update)
+            const hasResultsPerm = checkPerm(data.permissions?.add_results) || checkPerm(data.add_results)
+
+            // Decision Logic: Admin ho YA Approved user ke paas koi 1 posting permission ho
+            const postingAllowed = isRoleAdmin || (isActive && (hasGuessingPerm || hasMarketPerm || hasResultsPerm))
 
             setProfileUsername(username)
             setCanPost(postingAllowed)
             setIsAdmin(isRoleAdmin)
 
-            localStorage.setItem('guessing_profile_username', username)
-            localStorage.setItem('guessing_can_post', postingAllowed ? 'true' : 'false')
+            try {
+              localStorage.setItem('guessing_profile_username', username)
+              localStorage.setItem('guessing_can_post', postingAllowed ? 'true' : 'false')
+            } catch (e) {}
           } else {
             setCanPost(false)
             setIsAdmin(false)
-            localStorage.setItem('guessing_can_post', 'false')
           }
         } catch (err) {
           console.error("Error fetching user profile:", err)
@@ -78,8 +74,10 @@ export default function GuessingForum({ initialPosts }) {
         setCanPost(false)
         setIsAdmin(false)
         setProfileUsername('')
-        localStorage.removeItem('guessing_profile_username')
-        localStorage.setItem('guessing_can_post', 'false')
+        try {
+          localStorage.removeItem('guessing_profile_username')
+          localStorage.setItem('guessing_can_post', 'false')
+        } catch (e) {}
       }
     })
 
@@ -473,7 +471,6 @@ export default function GuessingForum({ initialPosts }) {
                     <div className="col-span-6 bg-[#00b000] text-white py-1.5 px-2 text-sm flex items-center justify-between border-r border-orange-400 [border-style:groove]">
                       <span>My Profile</span>
 
-                      {/* Sirf Owner ya Admin ko DELETE button dikhega */}
                       {isOwnerOrAdmin && (
                         <button
                           type="button"
@@ -506,5 +503,4 @@ export default function GuessingForum({ initialPosts }) {
       </div>
     </div>
   )
-                  }
-              
+      }
