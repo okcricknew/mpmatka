@@ -32,6 +32,12 @@ export default function RegisterClient() {
 
     setLoading(true)
 
+    // Safety timeout: Agar 15 second tak koi response na aaye toh loading rok dein
+    const timeoutId = setTimeout(() => {
+      setLoading(false)
+      setError('Request timed out. Please check your internet connection and try again.')
+    }, 15000)
+
     try {
       const fakeEmail = `${phone}@mpmatka.com`
       
@@ -51,11 +57,14 @@ export default function RegisterClient() {
         createdAt: serverTimestamp()
       })
 
+      clearTimeout(timeoutId) // Clear timeout on success
+
       // Success hone par home page par redirect karein
       router.push('/')
-      router.router?.refresh ? router.refresh() : window.location.reload()
+      router.refresh()
       
     } catch (err) {
+      clearTimeout(timeoutId) // Clear timeout on error
       console.error('Registration Error:', err)
       let errorMessage = 'Registration failed. Try again.'
       
@@ -64,6 +73,8 @@ export default function RegisterClient() {
         errorMessage = 'This mobile number is already registered!'
       } else if (err.code === 'auth/network-request-failed') {
         errorMessage = 'Network error. Please check your internet connection.'
+      } else if (err.code === 'auth/operation-not-allowed') {
+        errorMessage = 'Email/Password sign-in is not enabled in Firebase Console!'
       } else if (err.message) {
         errorMessage = err.message
       }
@@ -124,7 +135,6 @@ export default function RegisterClient() {
             <input
               type="password"
               value={password}
-              onChange={(e) => setPassword(e.target.setup || e.target.value)}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Enter password (min 6 chars)"
               required
