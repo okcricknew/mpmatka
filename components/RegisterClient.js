@@ -12,19 +12,21 @@ export default function RegisterClient() {
   const [phone, setPhone] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+  const [successMsg, setSuccessMsg] = useState('')
   const [loading, setLoading] = useState(false)
 
   const handleRegister = async (e) => {
     e.preventDefault()
     setError('')
+    setSuccessMsg('')
 
-    // Validation: Check 10 digit mobile number
+    // Validation: 10 digit mobile number check
     if (phone.length !== 10 || !/^\d{10}$/.test(phone)) {
       setError('Please enter a valid 10-digit mobile number.')
       return
     }
 
-    // Validation: Check password length
+    // Validation: Password length check
     if (password.length < 6) {
       setError('Password must be at least 6 characters long.')
       return
@@ -32,21 +34,15 @@ export default function RegisterClient() {
 
     setLoading(true)
 
-    // Safety timeout: Agar 15 second tak response na aaye toh app freeze na ho
-    const timeoutId = setTimeout(() => {
-      setLoading(false)
-      setError('Request timed out. Please check your internet connection.')
-    }, 15000)
-
     try {
-      // Background mein mobile number se automatic email create karna
       const fakeEmail = `${phone}@mpmatka.com`
       
       // 1. Firebase Auth mein user create karein
       const userCredential = await createUserWithEmailAndPassword(auth, fakeEmail, password)
       const user = userCredential.user
 
-      // 2. Firestore profiles collection mein data save karein (For Admin Activation)
+      // 2. Firestore profiles collection mein profile data save karein
+      // (Yahi step pehle miss ho raha tha ya block ho raha tha)
       await setDoc(doc(db, 'profiles', user.uid), {
         username: username.trim(),
         phone: phone.trim(),
@@ -58,14 +54,17 @@ export default function RegisterClient() {
         createdAt: serverTimestamp()
       })
 
-      clearTimeout(timeoutId)
+      // Success message dikhayein
+      setSuccessMsg('Registration Successful! Redirecting...')
+      alert('Registration Successful! Account created.')
 
-      // Success hone par home page par redirect karein
-      router.push('/')
-      router.refresh()
-      
+      // 1 second baad home page par redirect karein
+      setTimeout(() => {
+        router.push('/')
+        router.refresh()
+      }, 1000)
+
     } catch (err) {
-      clearTimeout(timeoutId)
       console.error('Registration Error:', err)
       let errorMessage = 'Registration failed. Try again.'
       
@@ -73,14 +72,12 @@ export default function RegisterClient() {
         errorMessage = 'This mobile number is already registered!'
       } else if (err.code === 'auth/network-request-failed') {
         errorMessage = 'Network error. Please check your internet connection.'
-      } else if (err.code === 'auth/operation-not-allowed') {
-        errorMessage = 'Email/Password sign-in is not enabled in Firebase Console!'
       } else if (err.message) {
         errorMessage = err.message
       }
 
       setError(errorMessage)
-      alert(errorMessage) // Mobile screen par turant error dikhane ke liye
+      alert(errorMessage) // Turant screen par error popup dikhane ke liye
     } finally {
       setLoading(false)
     }
@@ -96,6 +93,12 @@ export default function RegisterClient() {
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded text-xs mb-3 font-semibold">
             {error}
+          </div>
+        )}
+
+        {successMsg && (
+          <div className="bg-green-100 border border-green-400 text-green-700 px-3 py-2 rounded text-xs mb-3 font-semibold">
+            {successMsg}
           </div>
         )}
 
@@ -160,5 +163,4 @@ export default function RegisterClient() {
       </div>
     </div>
   )
-                }
-                  
+}
