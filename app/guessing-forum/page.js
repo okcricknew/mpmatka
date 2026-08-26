@@ -6,42 +6,36 @@ import { collection, onSnapshot, addDoc, serverTimestamp, doc, getDoc, deleteDoc
 import { onAuthStateChanged } from 'firebase/auth'
 
 export default function GuessingForum() {
-  const [posts, setPosts] = useState(() => {
-    if (typeof window === 'undefined') return []
-    try {
-      const cachedPosts = localStorage.getItem('guessing_posts_cache')
-      return cachedPosts ? JSON.parse(cachedPosts) : []
-    } catch (e) {
-      return []
-    }
-  })
-
+  // Start with empty states to prevent SSR Hydration Mismatch & UI Flickering
+  const [posts, setPosts] = useState([])
   const [isAdmin, setIsAdmin] = useState(false)
   const [user, setUser] = useState(null)
-  
-  const [profileUsername, setProfileUsername] = useState(() => {
-    if (typeof window === 'undefined') return ''
-    try {
-      return localStorage.getItem('guessing_profile_username') || ''
-    } catch (e) {
-      return ''
-    }
-  })
-
-  const [canPost, setCanPost] = useState(() => {
-    if (typeof window === 'undefined') return false
-    try {
-      return localStorage.getItem('guessing_can_post') === 'true'
-    } catch (e) {
-      return false
-    }
-  })
+  const [profileUsername, setProfileUsername] = useState('')
+  const [canPost, setCanPost] = useState(false)
+  const [isClient, setIsClient] = useState(false)
 
   const [guessText, setGuessText] = useState('')
   const [quotingPost, setQuotingPost] = useState(null)
   const [loading, setLoading] = useState(false)
   const [showOriginalPosts, setShowOriginalPosts] = useState(true)
   const postFormRef = useRef(null)
+
+  // Safe LocalStorage Load after component mounts on client side
+  useEffect(() => {
+    setIsClient(true)
+    try {
+      const cachedPosts = localStorage.getItem('guessing_posts_cache')
+      if (cachedPosts) setPosts(JSON.parse(cachedPosts))
+
+      const cachedUsername = localStorage.getItem('guessing_profile_username')
+      if (cachedUsername) setProfileUsername(cachedUsername)
+
+      const cachedCanPost = localStorage.getItem('guessing_can_post')
+      if (cachedCanPost) setCanPost(cachedCanPost === 'true')
+    } catch (e) {
+      console.error("Local storage read error:", e)
+    }
+  }, [])
 
   useEffect(() => {
     let unsubscribePosts = null
@@ -323,6 +317,11 @@ export default function GuessingForum() {
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' })
   const scrollToBottom = () => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' })
 
+  // Prevent rendering mismatch until client-side hydration completes
+  if (!isClient) {
+    return <div className="p-4 text-center text-xs font-bold">Loading Forum...</div>
+  }
+
   return (
     <div className="w-full mt-2 bg-white font-sans text-sm">
       <div className="bg-yellow-400 text-black text-center py-2 font-black text-sm border-b border-orange-400 uppercase tracking-wider">
@@ -527,5 +526,4 @@ export default function GuessingForum() {
       </div>
     </div>
   )
-            }
-          
+}
