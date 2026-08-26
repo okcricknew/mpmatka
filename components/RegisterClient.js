@@ -18,8 +18,15 @@ export default function RegisterClient() {
     e.preventDefault()
     setError('')
 
-    if (phone.length !== 10) {
+    // Validation: Check 10 digit mobile number
+    if (phone.length !== 10 || !/^\d{10}$/.test(phone)) {
       setError('Please enter a valid 10-digit mobile number.')
+      return
+    }
+
+    // Validation: Check password length
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters long.')
       return
     }
 
@@ -28,12 +35,11 @@ export default function RegisterClient() {
     try {
       const fakeEmail = `${phone}@mpmatka.com`
       
-      // 1. Firebase Auth mein user create karein
+      // 1. Firebase Auth me user create karein
       const userCredential = await createUserWithEmailAndPassword(auth, fakeEmail, password)
       const user = userCredential.user
 
-      // 2. Firestore ke 'profiles' collection mein user ki details save karein
-      // (Default: is_approved = false, taaki admin activate kare tabhi post kar sake)
+      // 2. Firestore profiles collection me data save karein
       await setDoc(doc(db, 'profiles', user.uid), {
         username: username.trim(),
         phone: phone.trim(),
@@ -45,12 +51,25 @@ export default function RegisterClient() {
         createdAt: serverTimestamp()
       })
 
-      // Success hone par home page par bhej dein
+      // Success hone par home page par redirect karein
       router.push('/')
-      router.refresh()
+      router.router?.refresh ? router.refresh() : window.location.reload()
+      
     } catch (err) {
-      console.error(err)
-      setError(err.message || 'Registration failed. Try again.')
+      console.error('Registration Error:', err)
+      let errorMessage = 'Registration failed. Try again.'
+      
+      // Firebase specific user friendly errors
+      if (err.code === 'auth/email-already-in-use') {
+        errorMessage = 'This mobile number is already registered!'
+      } else if (err.code === 'auth/network-request-failed') {
+        errorMessage = 'Network error. Please check your internet connection.'
+      } else if (err.message) {
+        errorMessage = err.message
+      }
+
+      setError(errorMessage)
+      alert(errorMessage) // Mobile par turant error dikhane ke liye
     } finally {
       setLoading(false)
     }
@@ -64,7 +83,7 @@ export default function RegisterClient() {
         </h2>
 
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded text-xs mb-3">
+          <div className="bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded text-xs mb-3 font-semibold">
             {error}
           </div>
         )}
@@ -105,6 +124,7 @@ export default function RegisterClient() {
             <input
               type="password"
               value={password}
+              onChange={(e) => setPassword(e.target.setup || e.target.value)}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Enter password (min 6 chars)"
               required
