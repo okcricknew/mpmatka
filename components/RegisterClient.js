@@ -3,9 +3,8 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 
-import { auth, db } from "../lib/firebase";
+import { auth } from "../lib/firebase";
 
 export default function RegisterClient() {
   const router = useRouter();
@@ -20,12 +19,17 @@ export default function RegisterClient() {
   const handleRegister = async (e) => {
     e.preventDefault();
 
+    if (loading) return;
+
     setError("");
 
     const cleanUsername = username.trim();
     const cleanPhone = phone.replace(/\D/g, "");
 
-    // Username validation
+    // ==========================================
+    // VALIDATION
+    // ==========================================
+
     if (!cleanUsername) {
       setError("Please enter your username.");
       return;
@@ -36,13 +40,11 @@ export default function RegisterClient() {
       return;
     }
 
-    // Mobile validation
     if (!/^[6-9]\d{9}$/.test(cleanPhone)) {
       setError("Please enter a valid 10-digit mobile number.");
       return;
     }
 
-    // Password validation
     if (password.length < 6) {
       setError("Password must be at least 6 characters.");
       return;
@@ -51,67 +53,73 @@ export default function RegisterClient() {
     setLoading(true);
 
     try {
-      /*
-       * Firebase Authentication
-       *
-       * Firebase Email/Password Auth use karega.
-       * Mobile number ko fake email ke form mein use kar rahe hain.
-       */
+      // ==========================================
+      // 1. CREATE FIREBASE AUTH USER
+      // ==========================================
+
       const fakeEmail = `${cleanPhone}@mpmatka.com`;
 
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        fakeEmail,
-        password
-      );
+      const userCredential =
+        await createUserWithEmailAndPassword(
+          auth,
+          fakeEmail,
+          password
+        );
 
       const user = userCredential.user;
 
-      /*
-       * Firestore profile
-       *
-       * profiles/{uid}
-       */
-      await setDoc(doc(db, "profiles", user.uid), {
-        uid: user.uid,
+      // ==========================================
+      // 2. CREATE FIRESTORE PROFILE
+      // ==========================================
 
-        username: cleanUsername,
+      const response = await fetch("/api/register", {
+        method: "POST",
 
-        phone: cleanPhone,
-
-        email: fakeEmail,
-
-        is_approved: false,
-
-        permissions: {
-          market_update: false,
-          add_results: false,
+        headers: {
+          "Content-Type": "application/json",
         },
 
-        createdAt: serverTimestamp(),
+        body: JSON.stringify({
+          uid: user.uid,
+          username: cleanUsername,
+          phone: cleanPhone,
+          email: fakeEmail,
+        }),
       });
 
-      /*
-       * Registration successful
-       */
-      router.push("/");
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data?.error || "Profile creation failed."
+        );
+      }
+
+      // ==========================================
+      // 3. SUCCESS
+      // ==========================================
+
+      router.replace("/");
       router.refresh();
     } catch (err) {
       console.error("Registration error:", err);
 
-      let message = "Registration failed. Please try again.";
+      let message =
+        "Registration failed. Please try again.";
 
       if (err?.code === "auth/email-already-in-use") {
-        message = "This mobile number is already registered.";
+        message =
+          "This mobile number is already registered.";
       } else if (err?.code === "auth/invalid-email") {
         message = "Invalid mobile number.";
       } else if (err?.code === "auth/weak-password") {
-        message = "Password must be at least 6 characters.";
-      } else if (err?.code === "auth/network-request-failed") {
-        message = "Network error. Please check your internet connection.";
-      } else if (err?.code === "permission-denied") {
         message =
-          "Account created, but profile could not be saved. Check Firestore rules.";
+          "Password must be at least 6 characters.";
+      } else if (
+        err?.code === "auth/network-request-failed"
+      ) {
+        message =
+          "Network error. Please check your internet connection.";
       } else if (err?.message) {
         message = err.message;
       }
@@ -125,6 +133,7 @@ export default function RegisterClient() {
   return (
     <div className="flex justify-center items-center px-4">
       <div className="bg-white w-full max-w-md rounded-lg border-2 border-red-600 p-6 shadow-xl">
+
         <h2 className="text-xl font-bold text-blue-900 text-center border-b pb-2 mb-4">
           Register New Account
         </h2>
@@ -135,7 +144,11 @@ export default function RegisterClient() {
           </div>
         )}
 
-        <form onSubmit={handleRegister} className="space-y-4">
+        <form
+          onSubmit={handleRegister}
+          className="space-y-4"
+        >
+
           {/* USERNAME */}
           <div>
             <label className="block text-xs font-bold text-black mb-1">
@@ -145,7 +158,9 @@ export default function RegisterClient() {
             <input
               type="text"
               value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              onChange={(e) =>
+                setUsername(e.target.value)
+              }
               placeholder="Enter your username"
               required
               disabled={loading}
@@ -160,6 +175,7 @@ export default function RegisterClient() {
             </label>
 
             <div className="flex">
+
               <span className="inline-flex items-center px-3 border border-r-0 border-gray-400 bg-gray-100 text-black text-sm font-bold rounded-l">
                 +91
               </span>
@@ -181,6 +197,7 @@ export default function RegisterClient() {
                 disabled={loading}
                 className="w-full border border-gray-400 rounded-r p-2 text-sm font-semibold text-black"
               />
+
             </div>
           </div>
 
@@ -193,7 +210,9 @@ export default function RegisterClient() {
             <input
               type="password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) =>
+                setPassword(e.target.value)
+              }
               placeholder="Enter password (min 6 chars)"
               required
               minLength={6}
@@ -202,18 +221,22 @@ export default function RegisterClient() {
             />
           </div>
 
-          {/* REGISTER */}
+          {/* REGISTER BUTTON */}
           <button
             type="submit"
             disabled={loading}
             className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 rounded text-sm disabled:opacity-50"
           >
-            {loading ? "Registering..." : "Register"}
+            {loading
+              ? "Registering..."
+              : "Register"}
           </button>
+
         </form>
 
         <p className="text-center text-xs text-gray-600 mt-4">
           Already have an account?{" "}
+
           <a
             href="/login"
             className="text-blue-900 font-bold hover:underline"
@@ -221,7 +244,8 @@ export default function RegisterClient() {
             Login here
           </a>
         </p>
+
       </div>
     </div>
   );
-}
+                }
