@@ -32,24 +32,25 @@ export default function RegisterClient() {
 
     setLoading(true)
 
-    // Safety timeout: Agar 15 second tak koi response na aaye toh loading rok dein
+    // Safety timeout: Agar 15 second tak response na aaye toh app freeze na ho
     const timeoutId = setTimeout(() => {
       setLoading(false)
-      setError('Request timed out. Please check your internet connection and try again.')
+      setError('Request timed out. Please check your internet connection.')
     }, 15000)
 
     try {
+      // Background mein mobile number se automatic email create karna
       const fakeEmail = `${phone}@mpmatka.com`
       
-      // 1. Firebase Auth me user create karein
+      // 1. Firebase Auth mein user create karein
       const userCredential = await createUserWithEmailAndPassword(auth, fakeEmail, password)
       const user = userCredential.user
 
-      // 2. Firestore profiles collection me data save karein
+      // 2. Firestore profiles collection mein data save karein (For Admin Activation)
       await setDoc(doc(db, 'profiles', user.uid), {
         username: username.trim(),
         phone: phone.trim(),
-        is_approved: false,
+        is_approved: false, // Default inactive jab tak admin approve na kare
         permissions: {
           market_update: false,
           add_results: false
@@ -57,18 +58,17 @@ export default function RegisterClient() {
         createdAt: serverTimestamp()
       })
 
-      clearTimeout(timeoutId) // Clear timeout on success
+      clearTimeout(timeoutId)
 
       // Success hone par home page par redirect karein
       router.push('/')
       router.refresh()
       
     } catch (err) {
-      clearTimeout(timeoutId) // Clear timeout on error
+      clearTimeout(timeoutId)
       console.error('Registration Error:', err)
       let errorMessage = 'Registration failed. Try again.'
       
-      // Firebase specific user friendly errors
       if (err.code === 'auth/email-already-in-use') {
         errorMessage = 'This mobile number is already registered!'
       } else if (err.code === 'auth/network-request-failed') {
@@ -80,7 +80,7 @@ export default function RegisterClient() {
       }
 
       setError(errorMessage)
-      alert(errorMessage) // Mobile par turant error dikhane ke liye
+      alert(errorMessage) // Mobile screen par turant error dikhane ke liye
     } finally {
       setLoading(false)
     }
@@ -160,4 +160,5 @@ export default function RegisterClient() {
       </div>
     </div>
   )
-}
+                }
+                  
