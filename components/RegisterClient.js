@@ -15,43 +15,34 @@ export default function RegisterClient() {
   const [password, setPassword] = useState("");
 
   const [error, setError] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleRegister = async (e) => {
     e.preventDefault();
-
     setError("");
+    setSuccessMsg("");
 
     const cleanUsername = username.trim();
     const cleanPhone = phone.replace(/\D/g, "");
 
-    // ==============================
-    // USERNAME VALIDATION
-    // ==============================
-
+    // Username Validation
     if (!cleanUsername) {
       setError("Please enter your username.");
       return;
     }
-
     if (cleanUsername.length < 3) {
       setError("Username must be at least 3 characters.");
       return;
     }
 
-    // ==============================
-    // MOBILE VALIDATION
-    // ==============================
-
+    // Mobile Validation
     if (!/^[6-9]\d{9}$/.test(cleanPhone)) {
       setError("Please enter a valid 10-digit mobile number.");
       return;
     }
 
-    // ==============================
-    // PASSWORD VALIDATION
-    // ==============================
-
+    // Password Validation
     if (password.length < 6) {
       setError("Password must be at least 6 characters.");
       return;
@@ -60,243 +51,158 @@ export default function RegisterClient() {
     setLoading(true);
 
     try {
-      // ==========================================
-      // FIREBASE AUTH
-      // ==========================================
-
       const fakeEmail = `${cleanPhone}@mpmatka.com`;
 
-      const userCredential =
-        await createUserWithEmailAndPassword(
-          auth,
-          fakeEmail,
-          password
-        );
+      // 1. Create User in Firebase Auth
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        fakeEmail,
+        password
+      );
 
       const user = userCredential.user;
 
-      // ==========================================
-      // FIRESTORE PROFILE
-      // profiles/{uid}
-      // ==========================================
-
+      // 2. Save Profile in Firestore (Default is_approved: false)
       await setDoc(doc(db, "profiles", user.uid), {
         uid: user.uid,
-
         username: cleanUsername,
-
         phone: cleanPhone,
-
         email: fakeEmail,
-
-        // ========================================
-        // NEW USER DEFAULT STATUS
-        // ========================================
-
-        is_approved: false,
-
+        is_approved: false, // New user is locked until approved by admin
         is_admin: false,
-
-        // ========================================
-        // NEW USER DEFAULT PERMISSIONS
-        // ========================================
-
         permissions: {
           market_update: false,
           add_results: false,
         },
-
         createdAt: serverTimestamp(),
       });
 
-      // ==========================================
-      // SUCCESS
-      // ==========================================
-
-      router.push("/");
-      router.refresh();
+      setSuccessMsg("Registration successful! Account pending admin approval.");
+      
+      setTimeout(() => {
+        router.push("/login");
+        router.refresh();
+      }, 2000);
 
     } catch (err) {
       console.error("Registration error:", err);
 
-      let message =
-        "Registration failed. Please try again.";
+      let message = "Registration failed. Please try again.";
 
       if (err?.code === "auth/email-already-in-use") {
-        message =
-          "This mobile number is already registered.";
-      }
-
-      else if (err?.code === "auth/invalid-email") {
-        message = "Invalid mobile number.";
-      }
-
-      else if (err?.code === "auth/weak-password") {
-        message =
-          "Password must be at least 6 characters.";
-      }
-
-      else if (err?.code === "auth/network-request-failed") {
-        message =
-          "Network error. Please check your internet connection.";
-      }
-
-      else if (err?.code === "permission-denied") {
-        message =
-          "Account created, but profile could not be saved. Please check Firestore Rules.";
-      }
-
-      else if (err?.message) {
+        message = "This mobile number is already registered.";
+      } else if (err?.code === "auth/invalid-email") {
+        message = "Invalid mobile number format.";
+      } else if (err?.code === "auth/weak-password") {
+        message = "Password must be at least 6 characters.";
+      } else if (err?.code === "auth/network-request-failed") {
+        message = "Network error. Please check your connection.";
+      } else if (err?.code === "permission-denied") {
+        message = "Permission denied. Check your Firestore Security Rules.";
+      } else if (err?.message) {
         message = err.message;
       }
 
       setError(message);
-
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="flex justify-center items-center px-4">
-
+    <div className="flex justify-center items-center px-4 py-8">
       <div className="bg-white w-full max-w-md rounded-lg border-2 border-red-600 p-6 shadow-xl">
-
         <h2 className="text-xl font-bold text-blue-900 text-center border-b pb-2 mb-4">
           Register New Account
         </h2>
 
-        {/* ERROR */}
-
+        {/* ERROR MESSAGE */}
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded text-xs mb-3">
+          <div className="bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded text-xs mb-3 font-semibold">
             {error}
           </div>
         )}
 
-        <form
-          onSubmit={handleRegister}
-          className="space-y-4"
-        >
+        {/* SUCCESS MESSAGE */}
+        {successMsg && (
+          <div className="bg-green-100 border border-green-400 text-green-700 px-3 py-2 rounded text-xs mb-3 font-semibold">
+            {successMsg}
+          </div>
+        )}
 
-          {/* USERNAME */}
-
+        <form onSubmit={handleRegister} className="space-y-4">
           <div>
-
             <label className="block text-xs font-bold text-black mb-1">
               Username
             </label>
-
             <input
               type="text"
               value={username}
-              onChange={(e) =>
-                setUsername(e.target.value)
-              }
+              onChange={(e) => setUsername(e.target.value)}
               placeholder="Enter your username"
               required
               disabled={loading}
-              className="w-full border border-gray-400 rounded p-2 text-sm font-semibold text-black"
+              className="w-full border border-gray-400 rounded p-2 text-sm font-semibold text-black bg-white"
             />
-
           </div>
 
-
-          {/* MOBILE */}
-
           <div>
-
             <label className="block text-xs font-bold text-black mb-1">
               Mobile Number
             </label>
-
             <div className="flex">
-
               <span className="inline-flex items-center px-3 border border-r-0 border-gray-400 bg-gray-100 text-black text-sm font-bold rounded-l">
                 +91
               </span>
-
               <input
                 type="tel"
                 inputMode="numeric"
                 value={phone}
                 onChange={(e) => {
-
-                  const value =
-                    e.target.value
-                      .replace(/\D/g, "")
-                      .slice(0, 10);
-
+                  const value = e.target.value.replace(/\D/g, "").slice(0, 10);
                   setPhone(value);
                 }}
                 placeholder="Enter 10 digit number"
                 maxLength={10}
                 required
                 disabled={loading}
-                className="w-full border border-gray-400 rounded-r p-2 text-sm font-semibold text-black"
+                className="w-full border border-gray-400 rounded-r p-2 text-sm font-semibold text-black bg-white"
               />
-
             </div>
-
           </div>
 
-
-          {/* PASSWORD */}
-
           <div>
-
             <label className="block text-xs font-bold text-black mb-1">
               Password
             </label>
-
             <input
               type="password"
               value={password}
-              onChange={(e) =>
-                setPassword(e.target.value)
-              }
+              onChange={(e) => setPassword(e.target.value)}
               placeholder="Enter password (min 6 chars)"
               required
               minLength={6}
               disabled={loading}
-              className="w-full border border-gray-400 rounded p-2 text-sm font-semibold text-black"
+              className="w-full border border-gray-400 rounded p-2 text-sm font-semibold text-black bg-white"
             />
-
           </div>
-
-
-          {/* REGISTER BUTTON */}
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 rounded text-sm disabled:opacity-50"
+            className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 rounded text-sm disabled:opacity-50 transition-colors"
           >
-            {loading
-              ? "Registering..."
-              : "Register"}
+            {loading ? "Registering..." : "Register"}
           </button>
-
         </form>
 
-
-        {/* LOGIN */}
-
         <p className="text-center text-xs text-gray-600 mt-4">
-
           Already have an account?{" "}
-
-          <a
-            href="/login"
-            className="text-blue-900 font-bold hover:underline"
-          >
+          <a href="/login" className="text-blue-900 font-bold hover:underline">
             Login here
           </a>
-
         </p>
-
       </div>
-
     </div>
   );
-          }
+                }
