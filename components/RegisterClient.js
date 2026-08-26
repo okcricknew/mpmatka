@@ -3,8 +3,9 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createUserWithEmailAndPassword } from "firebase/auth";
+import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 
-import { auth } from "../lib/firebase";
+import { auth, db } from "../lib/firebase";
 
 export default function RegisterClient() {
   const router = useRouter();
@@ -19,16 +20,14 @@ export default function RegisterClient() {
   const handleRegister = async (e) => {
     e.preventDefault();
 
-    if (loading) return;
-
     setError("");
 
     const cleanUsername = username.trim();
     const cleanPhone = phone.replace(/\D/g, "");
 
-    // ==========================================
-    // VALIDATION
-    // ==========================================
+    // ==============================
+    // USERNAME VALIDATION
+    // ==============================
 
     if (!cleanUsername) {
       setError("Please enter your username.");
@@ -40,10 +39,18 @@ export default function RegisterClient() {
       return;
     }
 
+    // ==============================
+    // MOBILE VALIDATION
+    // ==============================
+
     if (!/^[6-9]\d{9}$/.test(cleanPhone)) {
       setError("Please enter a valid 10-digit mobile number.");
       return;
     }
+
+    // ==============================
+    // PASSWORD VALIDATION
+    // ==============================
 
     if (password.length < 6) {
       setError("Password must be at least 6 characters.");
@@ -54,7 +61,7 @@ export default function RegisterClient() {
 
     try {
       // ==========================================
-      // 1. CREATE FIREBASE AUTH USER
+      // FIREBASE AUTH
       // ==========================================
 
       const fakeEmail = `${cleanPhone}@mpmatka.com`;
@@ -69,38 +76,46 @@ export default function RegisterClient() {
       const user = userCredential.user;
 
       // ==========================================
-      // 2. CREATE FIRESTORE PROFILE
+      // FIRESTORE PROFILE
+      // profiles/{uid}
       // ==========================================
 
-      const response = await fetch("/api/register", {
-        method: "POST",
+      await setDoc(doc(db, "profiles", user.uid), {
+        uid: user.uid,
 
-        headers: {
-          "Content-Type": "application/json",
+        username: cleanUsername,
+
+        phone: cleanPhone,
+
+        email: fakeEmail,
+
+        // ========================================
+        // NEW USER DEFAULT STATUS
+        // ========================================
+
+        is_approved: false,
+
+        is_admin: false,
+
+        // ========================================
+        // NEW USER DEFAULT PERMISSIONS
+        // ========================================
+
+        permissions: {
+          market_update: false,
+          add_results: false,
         },
 
-        body: JSON.stringify({
-          uid: user.uid,
-          username: cleanUsername,
-          phone: cleanPhone,
-          email: fakeEmail,
-        }),
+        createdAt: serverTimestamp(),
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(
-          data?.error || "Profile creation failed."
-        );
-      }
-
       // ==========================================
-      // 3. SUCCESS
+      // SUCCESS
       // ==========================================
 
-      router.replace("/");
+      router.push("/");
       router.refresh();
+
     } catch (err) {
       console.error("Registration error:", err);
 
@@ -110,21 +125,33 @@ export default function RegisterClient() {
       if (err?.code === "auth/email-already-in-use") {
         message =
           "This mobile number is already registered.";
-      } else if (err?.code === "auth/invalid-email") {
+      }
+
+      else if (err?.code === "auth/invalid-email") {
         message = "Invalid mobile number.";
-      } else if (err?.code === "auth/weak-password") {
+      }
+
+      else if (err?.code === "auth/weak-password") {
         message =
           "Password must be at least 6 characters.";
-      } else if (
-        err?.code === "auth/network-request-failed"
-      ) {
+      }
+
+      else if (err?.code === "auth/network-request-failed") {
         message =
           "Network error. Please check your internet connection.";
-      } else if (err?.message) {
+      }
+
+      else if (err?.code === "permission-denied") {
+        message =
+          "Account created, but profile could not be saved. Please check Firestore Rules.";
+      }
+
+      else if (err?.message) {
         message = err.message;
       }
 
       setError(message);
+
     } finally {
       setLoading(false);
     }
@@ -132,11 +159,14 @@ export default function RegisterClient() {
 
   return (
     <div className="flex justify-center items-center px-4">
+
       <div className="bg-white w-full max-w-md rounded-lg border-2 border-red-600 p-6 shadow-xl">
 
         <h2 className="text-xl font-bold text-blue-900 text-center border-b pb-2 mb-4">
           Register New Account
         </h2>
+
+        {/* ERROR */}
 
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded text-xs mb-3">
@@ -150,7 +180,9 @@ export default function RegisterClient() {
         >
 
           {/* USERNAME */}
+
           <div>
+
             <label className="block text-xs font-bold text-black mb-1">
               Username
             </label>
@@ -166,10 +198,14 @@ export default function RegisterClient() {
               disabled={loading}
               className="w-full border border-gray-400 rounded p-2 text-sm font-semibold text-black"
             />
+
           </div>
 
+
           {/* MOBILE */}
+
           <div>
+
             <label className="block text-xs font-bold text-black mb-1">
               Mobile Number
             </label>
@@ -185,9 +221,11 @@ export default function RegisterClient() {
                 inputMode="numeric"
                 value={phone}
                 onChange={(e) => {
-                  const value = e.target.value
-                    .replace(/\D/g, "")
-                    .slice(0, 10);
+
+                  const value =
+                    e.target.value
+                      .replace(/\D/g, "")
+                      .slice(0, 10);
 
                   setPhone(value);
                 }}
@@ -199,10 +237,14 @@ export default function RegisterClient() {
               />
 
             </div>
+
           </div>
 
+
           {/* PASSWORD */}
+
           <div>
+
             <label className="block text-xs font-bold text-black mb-1">
               Password
             </label>
@@ -219,9 +261,12 @@ export default function RegisterClient() {
               disabled={loading}
               className="w-full border border-gray-400 rounded p-2 text-sm font-semibold text-black"
             />
+
           </div>
 
+
           {/* REGISTER BUTTON */}
+
           <button
             type="submit"
             disabled={loading}
@@ -234,7 +279,11 @@ export default function RegisterClient() {
 
         </form>
 
+
+        {/* LOGIN */}
+
         <p className="text-center text-xs text-gray-600 mt-4">
+
           Already have an account?{" "}
 
           <a
@@ -243,9 +292,11 @@ export default function RegisterClient() {
           >
             Login here
           </a>
+
         </p>
 
       </div>
+
     </div>
   );
-                }
+          }
