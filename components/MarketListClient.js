@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { STATIC_MARKETS } from "../utils/constants";
+import { useAuth } from "../context/AuthContext"; // <-- 1. Import Auth Context
 
 export default function MarketListClient({ initialResults }) {
   const router = useRouter();
@@ -16,6 +17,7 @@ export default function MarketListClient({ initialResults }) {
   const [newTime, setNewTime] = useState("");
   const [newMessage, setNewMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const { isAdmin } = useAuth(); // <-- 2. Get isAdmin state
 
   const handleNavigation = (marketName, type) => {
     const slug = marketName
@@ -164,7 +166,8 @@ export default function MarketListClient({ initialResults }) {
             </div>
 
             {/* SEPARATE UPDATE BUTTONS - Result aur Message ke liye alag-alag */}
-            <div className="flex justify-center gap-2 mt-2">
+{isAdmin && ( 
+  <div className="flex justify-center gap-2 mt-2">
               <button
                 onClick={() => handleOpenModal(item, "result")}
                 className="bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold px-3 py-1 rounded border border-red-800"
@@ -178,6 +181,7 @@ export default function MarketListClient({ initialResults }) {
                 💬 UPDATE MSG
               </button>
             </div>
+                  )}
           </div>
         );
       })}
