@@ -3,35 +3,120 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../lib/firebase";
+import { doc, setDoc, serverTimestamp } from "firebase/firestore";
+
+import { auth, db } from "../lib/firebase";
 
 export default function RegisterClient() {
   const router = useRouter();
+
   const [username, setUsername] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
+
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleRegister = async (e) => {
     e.preventDefault();
+
     setError("");
 
-    if (phone.length !== 10) {
+    const cleanUsername = username.trim();
+    const cleanPhone = phone.replace(/\D/g, "");
+
+    // Username validation
+    if (!cleanUsername) {
+      setError("Please enter your username.");
+      return;
+    }
+
+    if (cleanUsername.length < 3) {
+      setError("Username must be at least 3 characters.");
+      return;
+    }
+
+    // Mobile validation
+    if (!/^[6-9]\d{9}$/.test(cleanPhone)) {
       setError("Please enter a valid 10-digit mobile number.");
+      return;
+    }
+
+    // Password validation
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters.");
       return;
     }
 
     setLoading(true);
 
     try {
-      const fakeEmail = `${phone}@mpmatka.com`;
-      await createUserWithEmailAndPassword(auth, fakeEmail, password);
+      /*
+       * Firebase Authentication
+       *
+       * Firebase Email/Password Auth use karega.
+       * Mobile number ko fake email ke form mein use kar rahe hain.
+       */
+      const fakeEmail = `${cleanPhone}@mpmatka.com`;
+
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        fakeEmail,
+        password
+      );
+
+      const user = userCredential.user;
+
+      /*
+       * Firestore profile
+       *
+       * profiles/{uid}
+       */
+      await setDoc(doc(db, "profiles", user.uid), {
+        uid: user.uid,
+
+        username: cleanUsername,
+
+        phone: cleanPhone,
+
+        email: fakeEmail,
+
+        is_approved: false,
+
+        permissions: {
+          market_update: false,
+          add_results: false,
+        },
+
+        createdAt: serverTimestamp(),
+      });
+
+      /*
+       * Registration successful
+       */
       router.push("/");
       router.refresh();
     } catch (err) {
-      console.error(err);
-      setError(err.message || "Registration failed. Try again.");
+      console.error("Registration error:", err);
+
+      let message = "Registration failed. Please try again.";
+
+      if (err?.code === "auth/email-already-in-use") {
+        message = "This mobile number is already registered.";
+      } else if (err?.code === "auth/invalid-email") {
+        message = "Invalid mobile number.";
+      } else if (err?.code === "auth/weak-password") {
+        message = "Password must be at least 6 characters.";
+      } else if (err?.code === "auth/network-request-failed") {
+        message = "Network error. Please check your internet connection.";
+      } else if (err?.code === "permission-denied") {
+        message =
+          "Account created, but profile could not be saved. Check Firestore rules.";
+      } else if (err?.message) {
+        message = err.message;
+      }
+
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -51,48 +136,73 @@ export default function RegisterClient() {
         )}
 
         <form onSubmit={handleRegister} className="space-y-4">
+          {/* USERNAME */}
           <div>
-            <label className="block text-xs font-bold text-black mb-1">Username</label>
+            <label className="block text-xs font-bold text-black mb-1">
+              Username
+            </label>
+
             <input
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               placeholder="Enter your username"
               required
+              disabled={loading}
               className="w-full border border-gray-400 rounded p-2 text-sm font-semibold text-black"
             />
           </div>
 
+          {/* MOBILE */}
           <div>
-            <label className="block text-xs font-bold text-black mb-1">Mobile Number</label>
+            <label className="block text-xs font-bold text-black mb-1">
+              Mobile Number
+            </label>
+
             <div className="flex">
               <span className="inline-flex items-center px-3 border border-r-0 border-gray-400 bg-gray-100 text-black text-sm font-bold rounded-l">
                 +91
               </span>
+
               <input
                 type="tel"
+                inputMode="numeric"
                 value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value
+                    .replace(/\D/g, "")
+                    .slice(0, 10);
+
+                  setPhone(value);
+                }}
                 placeholder="Enter 10 digit number"
                 maxLength={10}
                 required
+                disabled={loading}
                 className="w-full border border-gray-400 rounded-r p-2 text-sm font-semibold text-black"
               />
             </div>
           </div>
 
+          {/* PASSWORD */}
           <div>
-            <label className="block text-xs font-bold text-black mb-1">Password</label>
+            <label className="block text-xs font-bold text-black mb-1">
+              Password
+            </label>
+
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Enter password (min 6 chars)"
               required
+              minLength={6}
+              disabled={loading}
               className="w-full border border-gray-400 rounded p-2 text-sm font-semibold text-black"
             />
           </div>
 
+          {/* REGISTER */}
           <button
             type="submit"
             disabled={loading}
@@ -104,11 +214,14 @@ export default function RegisterClient() {
 
         <p className="text-center text-xs text-gray-600 mt-4">
           Already have an account?{" "}
-          <a href="/login" className="text-blue-900 font-bold hover:underline">
+          <a
+            href="/login"
+            className="text-blue-900 font-bold hover:underline"
+          >
             Login here
           </a>
         </p>
       </div>
     </div>
   );
-                  }
+}
