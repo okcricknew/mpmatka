@@ -1,50 +1,148 @@
-import { NextResponse } from 'next/server';
-import { initializeApp, getApps, cert } from 'firebase-admin/app';
-import { getAuth } from 'firebase-admin/auth';
+import { NextResponse } from "next/server";
+import { getAuth } from "firebase-admin/auth";
 
-if (!getApps().length) {
-  const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
-  const clientEmail = process.env.FIREBASE_ADMIN_CLIENT_EMAIL;
-  const privateKey = process.env.FIREBASE_ADMIN_PRIVATE_KEY;
-
-  if (projectId && clientEmail && privateKey) {
-    initializeApp({
-      credential: cert({
-        projectId,
-        clientEmail,
-        privateKey: privateKey.replace(/\\n/g, '\n'),
-      }),
-    });
-  }
-}
+import { db } from "../../../lib/firebase-admin";
 
 export async function POST(request) {
   try {
-    const { phone, newPassword } = await request.json();
+    const body = await request.json();
 
-    if (!phone || phone.length !== 10 || !newPassword || newPassword.length < 6) {
-      return NextResponse.json({ error: 'Invalid details provided.' }, { status: 400 });
+    const phone = body?.phone?.replace(/\D/g, "");
+    const newPassword = body?.newPassword;
+
+    // ==========================================
+    // VALIDATION
+    // ==========================================
+
+    if (!phone || !/^[6-9]\d{9}$/.test(phone)) {
+      return NextResponse.json(
+        {
+          error:
+            "Please enter a valid 10-digit mobile number.",
+        },
+        {
+          status: 400,
+        }
+      );
     }
 
-    if (!getApps().length) {
-      return NextResponse.json({ error: 'Server configuration error (Firebase Admin missing).' }, { status: 500 });
+    if (
+      !newPassword ||
+      newPassword.length < 6
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            "Password must be at least 6 characters long.",
+        },
+        {
+          status: 400,
+        }
+      );
     }
 
-    const fakeEmail = `${phone}@mpmatka.com`;
-    const authAdmin = getAuth();
+    // ==========================================
+    // FIND PROFILE
+    // ==========================================
 
-    try {
-      const userRecord = await authAdmin.getUserByEmail(fakeEmail);
+    const profileSnapshot = await db
+      .collection("profiles")
+      .where("phone", "==", phone)
+      .limit(1)
+      .get();
 
-      await authAdmin.updateUser(userRecord.uid, {
-        password: newPassword,
-      });
-
-      return NextResponse.json({ success: true, message: 'Password updated successfully!' });
-    } catch (err) {
-      return NextResponse.json({ error: 'Mobile number not registered.' }, { status: 404 });
+    if (profileSnapshot.empty) {
+      return NextResponse.json(
+        {
+          error:
+            "No account found with this mobile number.",
+        },
+        {
+          status: 404,
+        }
+      );
     }
-  } catch (err) {
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+
+    const profileDoc =
+      profileSnapshot.docs[0];
+
+    const profileData =
+      profileDoc.data();
+
+    const uid =
+      profileData?.uid ||
+      profileDoc.id;
+
+    if (!uid) {
+      return NextResponse.json(
+        {
+          error:
+            "User profile is incomplete.",
+        },
+        {
+          status: 500,
+        }
+      );
+    }
+
+    // ==========================================
+    // FIREBASE ADMIN AUTH
+    // ==========================================
+
+    const adminAuth = getAuth();
+
+    // ==========================================
+    // UPDATE PASSWORD
+    // ==========================================
+
+    await adminAuth.updateUser(uid, {
+      password: newPassword,
+    });
+
+    // ==========================================
+    // SUCCESS
+    // ==========================================
+
+    return NextResponse.json(
+      {
+        success: true,
+        message:
+          "Password updated successfully.",
+      },
+      {
+        status: 200,
+      }
+    );
+  } catch (error) {
+    console.error(
+      "Reset Password API Error:",
+      error
+    );
+
+    if (
+      error?.code ===
+      "auth/user-not-found"
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            "No account found with this mobile number.",
+        },
+        {
+          status: 404,
+        }
+      );
+    }
+
+    return NextResponse.json(
+      {
+        error:
+          error?.message ||
+          "Unable to reset password.",
+      },
+      {
+        status: 500,
+      }
+    );
   }
 }
