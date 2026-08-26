@@ -56,17 +56,18 @@ export async function POST(request) {
       .doc(uid)
       .set({
         uid: uid,
-
         username: username,
-
         phone: phone,
+        email: email || `${phone}@mpmatka.com`,
+        role: "user",
 
-        email:
-          email || `${phone}@mpmatka.com`,
+        // 1. New users ko default post allow karne ke liye isse true rakhein
+        // (Agar Admin Approval chahiye toh isse false hi rehne dein)
+        is_approved: true, 
 
-        is_approved: false,
-
+        // 2. Guessing Forum ki permission add ki gayi hai
         permissions: {
+          guessing_forum: true,  // <--- YEH ADD HUA HAI
           market_update: false,
           add_results: false,
         },
@@ -88,16 +89,11 @@ export async function POST(request) {
       }
     );
   } catch (error) {
-    console.error(
-      "Register API Error:",
-      error
-    );
+    console.error("Register API Error:", error);
 
     return NextResponse.json(
       {
-        error:
-          error?.message ||
-          "Unable to create profile.",
+        error: error?.message || "Unable to create profile.",
       },
       {
         status: 500,
