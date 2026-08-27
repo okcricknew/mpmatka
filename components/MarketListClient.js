@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { STATIC_MARKETS } from "../utils/constants";
 
@@ -20,6 +20,14 @@ export default function MarketListClient({
   const [newMessage, setNewMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const isAdmin = initialIsAdmin;
+
+    // SERVER SE NAYA DATA AATE HI CLIENT STATE AUTO-SYNC HO JAYEGI
+  useEffect(() => {
+    if (initialResults) {
+      setMarketResults(initialResults);
+    }
+  }, [initialResults]);
+  
 
   const handleNavigation = (marketName, type) => {
     const slug = marketName
@@ -89,6 +97,7 @@ export default function MarketListClient({
       }));
 
       handleCloseModal();
+      router.refresh();
     } catch (error) {
       console.error(error);
       alert("Error updating: " + error.message);
