@@ -6,13 +6,14 @@ import GuessingForumClient from "./GuessingForumClient";
 export default async function GuessingForum() {
   const user = await getCurrentUser();
 
-  const isAdmin = user ? (isUserAdmin(user.mobile) || user.is_admin === true) : false;
+  // Admin Check
+  const isAdmin = user ? Boolean(isUserAdmin(user.mobile) || user.is_admin === true) : false;
 
-  const canPost = Boolean(
-    user &&
-    user.is_approved &&
-    (user.permissions?.market_update === true || user.permissions?.add_results === true)
-  );
+  // Simple Approved Check: String "true" ya Boolean true dono ko handle karega
+  const isApproved = user?.is_approved === true || user?.is_approved === "true";
+
+  // UPDATED LOGIC: Sirf active (is_approved) ya Admin hone par posting allowed hai
+  const canPost = Boolean(user && (isAdmin || isApproved));
 
   let posts = [];
   try {
@@ -51,4 +52,3 @@ export default async function GuessingForum() {
     />
   );
 }
-
