@@ -1,11 +1,15 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
-import { onAuthStateChanged, signOut } from "firebase/auth";
-import { auth } from "../lib/firebase"; // Aapke firebase config ka path
-import { isUserAdmin } from "../utils/admins"; // Step 1 me banayi gayi file
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 
-const AuthContext = createContext();
+import { isUserAdmin } from "../utils/admins";
+
+const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -13,39 +17,100 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Firebase Auth State Observer: Har page refresh par automatically user aur admin role check karega
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
+    let isMounted = true;
 
-      if (currentUser && currentUser.email) {
-        // Firebase me email format: "9876543210@mpmatka.com" se phone number nikalenge
-        const phoneNumber = currentUser.email.split("@")[0];
-        
-        // Admin list check
-        const adminStatus = isUserAdmin(phoneNumber);
-        setIsAdmin(adminStatus);
-      } else {
-        setIsAdmin(false);
+    async function loadCurrentUser() {
+      try {
+        const response = await fetch("/api/auth/me", {
+          method: "GET",
+          credentials: "include",
+          cache: "no-store",
+        });
+
+        if (!response.ok) {
+          if (isMounted) {
+            setUser(null);
+            setIsAdmin(false);
+          }
+
+          return;
+        }
+
+        const data = await response.json();
+
+        if (!isMounted) return;
+
+        if (data.success && data.user) {
+          const currentUser = data.user;
+
+          setUser(currentUser);
+
+          const adminStatus = isUserAdmin(
+            currentUser.mobile
+          );
+
+          setIsAdmin(adminStatus);
+        } else {
+          setUser(null);
+          setIsAdmin(false);
+        }
+      } catch (error) {
+        console.error("Auth state error:", error);
+
+        if (isMounted) {
+          setUser(null);
+          setIsAdmin(false);
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
       }
+    }
 
-      setLoading(false);
-    });
+    loadCurrentUser();
 
-    return () => unsubscribe();
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const logout = async () => {
-    await signOut(auth);
-    setUser(null);
-    setIsAdmin(false);
+    try {
+      await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+    } catch (error) {
+      console.error("Logout error:", error);
+    } finally {
+      setUser(null);
+      setIsAdmin(false);
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ user, isAdmin, loading, logout }}>
-      {!loading && children}
+    <AuthContext.Provider
+      value={{
+        user,
+        isAdmin,
+        loading,
+        logout,
+      }}
+    >
+      {children}
     </AuthContext.Provider>
   );
 }
 
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = () => {
+  const context = useContext(AuthContext);
 
+  if (!context) {
+    throw new Error(
+      "useAuth must be used inside AuthProvider"
+    );
+  }
+
+  return context;
+};
