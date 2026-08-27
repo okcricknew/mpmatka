@@ -1,58 +1,10 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 
-export default function UserLoginSection() {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+export default function UserLoginSection({ initialUser = null }) {
+  const [user, setUser] = useState(initialUser);
   const [logoutLoading, setLogoutLoading] = useState(false);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    async function loadCurrentUser() {
-      try {
-        const response = await fetch("/api/auth/me", {
-          method: "GET",
-          credentials: "include",
-          cache: "no-store",
-        });
-
-        if (!response.ok) {
-          if (isMounted) {
-            setUser(null);
-          }
-          return;
-        }
-
-        const data = await response.json();
-
-        if (isMounted) {
-          if (data.success && data.user) {
-            setUser(data.user);
-          } else {
-            setUser(null);
-          }
-        }
-      } catch (error) {
-        console.error("Current user load error:", error);
-
-        if (isMounted) {
-          setUser(null);
-        }
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
-      }
-    }
-
-    loadCurrentUser();
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
 
   const handleLogout = async () => {
     try {
@@ -91,11 +43,7 @@ export default function UserLoginSection() {
         ✻ USER PANEL ✻
       </div>
 
-      {loading ? (
-        <div className="p-3 text-center text-xs font-bold text-gray-500 animate-pulse">
-          Loading...
-        </div>
-      ) : user ? (
+      {user ? (
         <div className="p-3 bg-white flex flex-col md:flex-row items-center justify-between gap-2 border-t border-gray-200">
           <div className="flex items-center gap-2">
             <span className="text-sm font-extrabold text-black uppercase">
