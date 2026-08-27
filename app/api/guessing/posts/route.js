@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { db } from "../../../../../lib/firebase-admin";
-import { getCurrentUser } from "../../../../../lib/auth-session";
+import { db } from "../../../../lib/firebase-admin";
+import { getCurrentUser } from "../../../../lib/auth-session";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
