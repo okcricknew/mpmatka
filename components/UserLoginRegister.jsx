@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { auth, db } from '../lib/firebase' // Absolute path safe loading ke liye
+import { auth, db } from '../lib/firebase' // Relative import fixed for build
 import { onAuthStateChanged, signOut } from 'firebase/auth'
 import { doc, getDoc } from 'firebase/firestore'
 
@@ -13,10 +13,16 @@ export default function UserLoginSection() {
   useEffect(() => {
     let isMounted = true
 
+    // Emergency Timeout: Agar Auth Listener late respond kare, toh 2 second me UI unlock karega
+    const safetyTimer = setTimeout(() => {
+      if (isMounted && loading) {
+        setLoading(false)
+      }
+    }, 2000)
+
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       try {
         if (!isMounted) return
-
         setUser(currentUser)
 
         if (currentUser) {
@@ -32,16 +38,18 @@ export default function UserLoginSection() {
           setProfile(null)
         }
       } catch (error) {
-        console.error("Error in UserLoginSection Auth:", error)
+        console.error("Error fetching profile in LoginSection:", error)
       } finally {
         if (isMounted) {
-          setLoading(false) // Guarantee karta hai ki loading state 100% remove hoga
+          setLoading(false)
+          clearTimeout(safetyTimer)
         }
       }
     })
 
     return () => {
       isMounted = false
+      clearTimeout(safetyTimer)
       unsubscribe()
     }
   }, [])
@@ -56,7 +64,7 @@ export default function UserLoginSection() {
     }
   }
 
-  // Boolean/String Checker Helper
+  // Exact original logic preserved
   const checkIsApproved = (val) => val === true || val === 'true'
 
   if (loading) {
@@ -67,26 +75,22 @@ export default function UserLoginSection() {
     )
   }
 
-  // Active User logic check
+  // Exact original active check preserved
   const isActive = profile ? (profile.role === 'admin' || checkIsApproved(profile.is_approved)) : false
 
   return (
     <div className="w-full bg-white border-2 border-[#5c245c] rounded-[4px] overflow-hidden my-3 shadow-sm">
-      {/* Header Title */}
       <div className="bg-[#5c245c] text-white text-center font-bold text-base py-2 tracking-wider font-sans">
         ✻ USER PANEL ✻
       </div>
 
-      {/* Main Panel View */}
       {user ? (
-        /* LOGGED IN USER VIEW */
         <div className="p-3 bg-white flex flex-col md:flex-row items-center justify-between gap-2 border-t border-gray-200">
           <div className="flex items-center gap-2">
             <span className="text-sm font-extrabold text-black uppercase">
               👤 {profile?.username || user.displayName || 'USER'}
             </span>
 
-            {/* Status Badge */}
             {isActive ? (
               <span className="bg-green-100 text-green-800 text-[11px] font-bold px-2 py-0.5 rounded border border-green-400">
                 🟢 ACTIVE
@@ -106,7 +110,6 @@ export default function UserLoginSection() {
           </button>
         </div>
       ) : (
-        /* LOGGED OUT USER VIEW */
         <div className="flex items-center justify-center gap-3 py-2.5 bg-white">
           <a
             href="/login"
