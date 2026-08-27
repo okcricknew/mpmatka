@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 import { getCurrentUser } from "../lib/auth-session";
+import { isUserAdmin } from "../utils/admins";
 import MarketListClient from "../components/MarketListClient";
 import { getInitialMarketResults } from "../services/marketService";
 import UserLoginRegister from "../components/UserLoginRegister";
@@ -10,6 +11,9 @@ import GamesAndChartsZone from "../components/GamesAndChartsZone";
 
 export default async function HomePage() {
   const currentUser = await getCurrentUser();
+  const isAdmin = currentUser
+  ? isUserAdmin(currentUser.mobile)
+  : false;
   const initialResults = await getInitialMarketResults();
 
   return (
@@ -17,7 +21,10 @@ export default async function HomePage() {
       {/* Market Results List & User Login Section */}
       <div className="w-full max-w-none min-w-0 m-0 mt-2 p-0">
     <LiveResults />
-        <MarketListClient initialResults={initialResults} />
+        <MarketListClient
+  initialResults={initialResults}
+  initialIsAdmin={isAdmin}
+/>
         <UserLoginRegister initialUser={currentUser} />
     <GamesAndChartsZone />
       </div>
