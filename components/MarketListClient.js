@@ -3,9 +3,11 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { STATIC_MARKETS } from "../utils/constants";
-import { useAuth } from "../context/AuthContext"; // <-- 1. Import Auth Context
 
-export default function MarketListClient({ initialResults }) {
+export default function MarketListClient({
+  initialResults,
+  initialIsAdmin = false,
+}) {
   const router = useRouter();
   const [marketResults, setMarketResults] = useState(
     initialResults || {}
@@ -17,7 +19,7 @@ export default function MarketListClient({ initialResults }) {
   const [newTime, setNewTime] = useState("");
   const [newMessage, setNewMessage] = useState("");
   const [loading, setLoading] = useState(false);
-  const { isAdmin } = useAuth(); // <-- 2. Get isAdmin state
+  const isAdmin = initialIsAdmin;
 
   const handleNavigation = (marketName, type) => {
     const slug = marketName
