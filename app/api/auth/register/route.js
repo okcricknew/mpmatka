@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
-import { db } from "../../../../../../lib/firebase-admin";
+import { db } from "../../../../lib/firebase-admin";
 
 export const runtime = "nodejs";
 
