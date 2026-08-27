@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { auth, db } from '../lib/firebase' // Relative import fixed for build
+import { auth, db } from '../lib/firebase'
 import { onAuthStateChanged, signOut } from 'firebase/auth'
 import { doc, getDoc } from 'firebase/firestore'
 
@@ -13,43 +13,47 @@ export default function UserLoginSection() {
   useEffect(() => {
     let isMounted = true
 
-    // Emergency Timeout: Agar Auth Listener late respond kare, toh 2 second me UI unlock karega
-    const safetyTimer = setTimeout(() => {
-      if (isMounted && loading) {
-        setLoading(false)
-      }
-    }, 2000)
-
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       try {
         if (!isMounted) return
         setUser(currentUser)
 
         if (currentUser) {
-          const userDocRef = doc(db, 'profiles', currentUser.uid)
-          const userDoc = await getDoc(userDocRef)
+          try {
+            // Firestore से user doc retrieve करना
+            const userDocRef = doc(db, 'profiles', currentUser.uid)
+            const userDoc = await getDoc(userDocRef)
 
-          if (userDoc.exists() && isMounted) {
-            setProfile(userDoc.data())
-          } else if (isMounted) {
-            setProfile(null)
+            if (userDoc.exists() && isMounted) {
+              setProfile(userDoc.data())
+            } else if (isMounted) {
+              // Document na mile toh fallback structure
+              setProfile({
+                username: currentUser.displayName || currentUser.email?.split('@')[0]
+              })
+            }
+          } catch (docErr) {
+            console.error("Firestore Fetch Error:", docErr)
+            if (isMounted) {
+              setProfile({
+                username: currentUser.displayName || currentUser.email?.split('@')[0]
+              })
+            }
           }
         } else if (isMounted) {
           setProfile(null)
         }
       } catch (error) {
-        console.error("Error fetching profile in LoginSection:", error)
+        console.error("Auth Listener Error:", error)
       } finally {
         if (isMounted) {
           setLoading(false)
-          clearTimeout(safetyTimer)
         }
       }
     })
 
     return () => {
       isMounted = false
-      clearTimeout(safetyTimer)
       unsubscribe()
     }
   }, [])
@@ -64,7 +68,7 @@ export default function UserLoginSection() {
     }
   }
 
-  // Exact original logic preserved
+  // AAPKA ORIGINAL LOGIC (Unchanged)
   const checkIsApproved = (val) => val === true || val === 'true'
 
   if (loading) {
@@ -75,8 +79,11 @@ export default function UserLoginSection() {
     )
   }
 
-  // Exact original active check preserved
+  // AAPKA ORIGINAL LOGIC (Unchanged)
   const isActive = profile ? (profile.role === 'admin' || checkIsApproved(profile.is_approved)) : false
+
+  // Priority Username Display (No fallback to empty 'USER' string)
+  const displayName = profile?.username || user?.displayName || user?.email?.split('@')[0] || profile?.phone || 'USER'
 
   return (
     <div className="w-full bg-white border-2 border-[#5c245c] rounded-[4px] overflow-hidden my-3 shadow-sm">
@@ -88,7 +95,7 @@ export default function UserLoginSection() {
         <div className="p-3 bg-white flex flex-col md:flex-row items-center justify-between gap-2 border-t border-gray-200">
           <div className="flex items-center gap-2">
             <span className="text-sm font-extrabold text-black uppercase">
-              👤 {profile?.username || user.displayName || 'USER'}
+              👤 {displayName}
             </span>
 
             {isActive ? (
