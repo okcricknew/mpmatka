@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { db } from "../../../../lib/firebase-admin";
-import { getCurrentUser } from "../../../../lib/auth-session";
-import { isUserAdmin } from "../../../../lib/admins";
+import { db } from "../../../../../../lib/firebase-admin";
+import { getCurrentUser } from "../../../../../../lib/auth-session";
+import { isUserAdmin } from "../../../../../../lib/admins";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
