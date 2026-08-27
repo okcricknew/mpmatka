@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { db } from "../../../..lib/firebase-admin";
+import { db } from "../../../../lib/firebase-admin";
 import { getCurrentUser } from "../../../../lib/auth-session";
 import { isUserAdmin } from "../../../../lib/admins";
 
