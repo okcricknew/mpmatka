@@ -1,66 +1,89 @@
-'use client'
+"use client";
 
-import React, { useState, useEffect } from 'react'
-import { auth, db } from '../lib/firebase'
-import { onAuthStateChanged, signOut } from 'firebase/auth'
-import { doc, getDoc } from 'firebase/firestore'
+import React, { useEffect, useState } from "react";
 
 export default function UserLoginSection() {
-  const [user, setUser] = useState(null)
-  const [profile, setProfile] = useState(null)
-  const [loading, setLoading] = useState(true)
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [logoutLoading, setLogoutLoading] = useState(false);
 
   useEffect(() => {
-    let isMounted = true
+    let isMounted = true;
 
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      if (!isMounted) return
+    async function loadCurrentUser() {
+      try {
+        const response = await fetch("/api/auth/me", {
+          method: "GET",
+          credentials: "include",
+          cache: "no-store",
+        });
 
-      if (currentUser) {
-        setUser(currentUser)
-
-        try {
-          // Direct Firestore Document Read
-          const userDocRef = doc(db, 'profiles', currentUser.uid)
-          const userDoc = await getDoc(userDocRef)
-
-          if (userDoc.exists() && isMounted) {
-            setProfile(userDoc.data())
+        if (!response.ok) {
+          if (isMounted) {
+            setUser(null);
           }
-        } catch (err) {
-          console.error("Profile load error:", err)
+          return;
         }
-      } else {
-        setUser(null)
-        setProfile(null)
-      }
 
-      if (isMounted) {
-        setLoading(false)
+        const data = await response.json();
+
+        if (isMounted) {
+          if (data.success && data.user) {
+            setUser(data.user);
+          } else {
+            setUser(null);
+          }
+        }
+      } catch (error) {
+        console.error("Current user load error:", error);
+
+        if (isMounted) {
+          setUser(null);
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
       }
-    })
+    }
+
+    loadCurrentUser();
 
     return () => {
-      isMounted = false
-      unsubscribe()
-    }
-  }, [])
+      isMounted = false;
+    };
+  }, []);
 
   const handleLogout = async () => {
     try {
-      await signOut(auth)
-      window.location.reload()
+      setLogoutLoading(true);
+
+      const response = await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error("Logout failed");
+      }
+
+      setUser(null);
+
+      window.location.reload();
     } catch (error) {
-      alert("Logout Error: " + error.message)
+      console.error("Logout Error:", error);
+      alert("Logout Error: " + error.message);
+    } finally {
+      setLogoutLoading(false);
     }
-  }
+  };
 
-  // AAPKA APPROVAL LOGIC
-  const checkIsApproved = (val) => val === true || val === 'true'
-  const isActive = profile ? (profile.role === 'admin' || checkIsApproved(profile.is_approved)) : false
+  const displayName =
+    user?.username ||
+    user?.mobile ||
+    "USER";
 
-  // PRIORITY NAME DISPLAY: Profile Username -> Mobile/Phone -> Auth Fallback
-  const displayName = profile?.username || profile?.phone || user?.displayName || user?.email?.split('@')[0] || 'USER'
+  const isActive = user?.is_approved === true;
 
   return (
     <div className="w-full bg-white border-2 border-[#5c245c] rounded-[4px] overflow-hidden my-3 shadow-sm">
@@ -92,9 +115,10 @@ export default function UserLoginSection() {
 
           <button
             onClick={handleLogout}
-            className="bg-red-600 text-white px-5 py-1 rounded-[6px] font-bold text-xs shadow hover:bg-red-700 transition-colors"
+            disabled={logoutLoading}
+            className="bg-red-600 text-white px-5 py-1 rounded-[6px] font-bold text-xs shadow hover:bg-red-700 disabled:bg-gray-400 transition-colors"
           >
-            LOGOUT
+            {logoutLoading ? "LOGGING OUT..." : "LOGOUT"}
           </button>
         </div>
       ) : (
@@ -105,9 +129,11 @@ export default function UserLoginSection() {
           >
             Login
           </a>
+
           <span className="text-[#666666] font-bold text-base select-none">
             //
           </span>
+
           <a
             href="/register"
             className="bg-[#ff0055] text-white px-6 py-1.5 rounded-[6px] font-bold text-sm shadow-md inline-block text-center hover:opacity-95 transition-opacity"
@@ -117,5 +143,5 @@ export default function UserLoginSection() {
         </div>
       )}
     </div>
-  )
+  );
 }
