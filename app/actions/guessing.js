@@ -96,12 +96,13 @@ export async function createGuessPost(formData) {
     const user = await getCurrentUser();
     if (!user) throw new Error("Unauthorized");
 
-    const hasPermission =
-      user.permissions?.market_update === true ||
-      user.permissions?.add_results === true;
+    const isAdmin = Boolean(isUserAdmin(user.mobile) || user.is_admin === true);
+    const isApproved = user.is_approved === true || user.is_approved === "true";
 
-    if (!user.is_approved || !hasPermission) {
-      throw new Error("Posting permission denied.");
+    // UPDATED PERMISSION LOGIC:
+    // User admin ho YA active (is_approved: true) ho, post kar sakta hai.
+    if (!isAdmin && !isApproved) {
+      throw new Error("Posting permission denied. Your account is deactivated.");
     }
 
     const guessText = formData.get("guessText");
@@ -143,7 +144,7 @@ export async function deleteGuessPost(postId) {
     const user = await getCurrentUser();
     if (!user) throw new Error("Unauthorized");
 
-    const isAdmin = isUserAdmin(user.mobile) || user.is_admin;
+    const isAdmin = Boolean(isUserAdmin(user.mobile) || user.is_admin === true);
     if (!isAdmin) throw new Error("Admin privilege required");
 
     await db.collection("guessing_posts").doc(postId).delete();
@@ -153,5 +154,4 @@ export async function deleteGuessPost(postId) {
     console.error("deleteGuessPost error:", err);
     return { error: err.message };
   }
-      }
-
+}
