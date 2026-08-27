@@ -1,4 +1,4 @@
-// lib/admin.js
+// utils/admin.js
 
 // ================================
 // ADMIN MOBILE NUMBERS
