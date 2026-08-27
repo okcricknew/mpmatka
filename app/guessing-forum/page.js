@@ -45,7 +45,6 @@ async function getInitialPosts() {
     return posts;
   } catch (error) {
     console.error("Initial guessing posts error:", error);
-
     return [];
   }
 }
@@ -60,7 +59,7 @@ export default async function GuessingForumPage() {
       <div className="w-full max-w-none min-w-0 m-0 mt-2 p-0">
         <GuessingForum
           initialPosts={initialPosts}
-          initialUser={user}
+          currentUser={user}
         />
       </div>
     </main>
