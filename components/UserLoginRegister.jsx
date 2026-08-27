@@ -14,41 +14,29 @@ export default function UserLoginSection() {
     let isMounted = true
 
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      try {
-        if (!isMounted) return
+      if (!isMounted) return
+
+      if (currentUser) {
         setUser(currentUser)
 
-        if (currentUser) {
-          try {
-            // Firestore से user doc retrieve करना
-            const userDocRef = doc(db, 'profiles', currentUser.uid)
-            const userDoc = await getDoc(userDocRef)
+        try {
+          // Direct Firestore Document Read
+          const userDocRef = doc(db, 'profiles', currentUser.uid)
+          const userDoc = await getDoc(userDocRef)
 
-            if (userDoc.exists() && isMounted) {
-              setProfile(userDoc.data())
-            } else if (isMounted) {
-              // Document na mile toh fallback structure
-              setProfile({
-                username: currentUser.displayName || currentUser.email?.split('@')[0]
-              })
-            }
-          } catch (docErr) {
-            console.error("Firestore Fetch Error:", docErr)
-            if (isMounted) {
-              setProfile({
-                username: currentUser.displayName || currentUser.email?.split('@')[0]
-              })
-            }
+          if (userDoc.exists() && isMounted) {
+            setProfile(userDoc.data())
           }
-        } else if (isMounted) {
-          setProfile(null)
+        } catch (err) {
+          console.error("Profile load error:", err)
         }
-      } catch (error) {
-        console.error("Auth Listener Error:", error)
-      } finally {
-        if (isMounted) {
-          setLoading(false)
-        }
+      } else {
+        setUser(null)
+        setProfile(null)
+      }
+
+      if (isMounted) {
+        setLoading(false)
       }
     })
 
@@ -61,29 +49,18 @@ export default function UserLoginSection() {
   const handleLogout = async () => {
     try {
       await signOut(auth)
-      localStorage.clear()
       window.location.reload()
     } catch (error) {
       alert("Logout Error: " + error.message)
     }
   }
 
-  // AAPKA ORIGINAL LOGIC (Unchanged)
+  // AAPKA APPROVAL LOGIC
   const checkIsApproved = (val) => val === true || val === 'true'
-
-  if (loading) {
-    return (
-      <div className="w-full bg-white border-2 border-[#5c245c] rounded-[4px] py-3 text-center text-xs font-bold text-gray-500 animate-pulse">
-        Checking Auth State...
-      </div>
-    )
-  }
-
-  // AAPKA ORIGINAL LOGIC (Unchanged)
   const isActive = profile ? (profile.role === 'admin' || checkIsApproved(profile.is_approved)) : false
 
-  // Priority Username Display (No fallback to empty 'USER' string)
-  const displayName = profile?.username || user?.displayName || user?.email?.split('@')[0] || profile?.phone || 'USER'
+  // PRIORITY NAME DISPLAY: Profile Username -> Mobile/Phone -> Auth Fallback
+  const displayName = profile?.username || profile?.phone || user?.displayName || user?.email?.split('@')[0] || 'USER'
 
   return (
     <div className="w-full bg-white border-2 border-[#5c245c] rounded-[4px] overflow-hidden my-3 shadow-sm">
@@ -91,7 +68,11 @@ export default function UserLoginSection() {
         ✻ USER PANEL ✻
       </div>
 
-      {user ? (
+      {loading ? (
+        <div className="p-3 text-center text-xs font-bold text-gray-500 animate-pulse">
+          Loading...
+        </div>
+      ) : user ? (
         <div className="p-3 bg-white flex flex-col md:flex-row items-center justify-between gap-2 border-t border-gray-200">
           <div className="flex items-center gap-2">
             <span className="text-sm font-extrabold text-black uppercase">
