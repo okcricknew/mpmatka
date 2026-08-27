@@ -2,9 +2,10 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
 
-import { auth } from "../lib/firebase";
+import { auth, db } from "../lib/firebase"; // db import add kiya hai
 
 export default function LoginClient() {
   const router = useRouter();
@@ -45,52 +46,52 @@ export default function LoginClient() {
     setLoading(true);
 
     try {
-      // ==========================================
-      // SAME EMAIL FORMAT USED DURING REGISTER
-      // ==========================================
-
       const fakeEmail = `${cleanPhone}@mpmatka.com`;
 
-      // ==========================================
-      // FIREBASE LOGIN
-      // ==========================================
-
-      await signInWithEmailAndPassword(
+      // 1. FIREBASE LOGIN
+      const userCredential = await signInWithEmailAndPassword(
         auth,
         fakeEmail,
         password
       );
 
-      // ==========================================
-      // LOGIN SUCCESS
-      // ==========================================
+      const user = userCredential.user;
 
-      router.replace("/");
-      router.refresh();
+      // 2. USERNAME AUTO-SYNC (Agla Screen Load Hone Se Pehle Name Fix Karega)
+      if (!user.displayName) {
+        try {
+          const userDocRef = doc(db, "profiles", user.uid);
+          const userDoc = await getDoc(userDocRef);
+
+          if (userDoc.exists() && userDoc.data()?.username) {
+            await updateProfile(user, {
+              displayName: userDoc.data().username,
+            });
+          }
+        } catch (syncErr) {
+          console.error("Name sync error:", syncErr);
+        }
+      }
+
+      // 3. HARD NAVIGATION (Static state break karne ke liye)
+      window.location.href = "/";
     } catch (err) {
       console.error("Login error:", err);
 
-      let message =
-        "Invalid mobile number or password.";
+      let message = "Invalid mobile number or password.";
 
       if (
         err?.code === "auth/invalid-credential" ||
         err?.code === "auth/wrong-password" ||
         err?.code === "auth/user-not-found"
       ) {
-        message =
-          "Invalid mobile number or password.";
+        message = "Invalid mobile number or password.";
       } else if (err?.code === "auth/too-many-requests") {
-        message =
-          "Too many login attempts. Please try again later.";
-      } else if (
-        err?.code === "auth/network-request-failed"
-      ) {
-        message =
-          "Network error. Please check your internet connection.";
+        message = "Too many login attempts. Please try again later.";
+      } else if (err?.code === "auth/network-request-failed") {
+        message = "Network error. Please check your internet connection.";
       } else if (err?.code === "auth/user-disabled") {
-        message =
-          "This account has been disabled.";
+        message = "This account has been disabled.";
       }
 
       setError(message);
@@ -113,10 +114,7 @@ export default function LoginClient() {
           </div>
         )}
 
-        <form
-          onSubmit={handleLogin}
-          className="space-y-4"
-        >
+        <form onSubmit={handleLogin} className="space-y-4">
 
           {/* MOBILE NUMBER */}
           <div>
@@ -125,7 +123,6 @@ export default function LoginClient() {
             </label>
 
             <div className="flex">
-
               <span className="inline-flex items-center px-3 border border-r-0 border-gray-400 bg-gray-100 text-black text-sm font-bold rounded-l">
                 +91
               </span>
@@ -147,7 +144,6 @@ export default function LoginClient() {
                 disabled={loading}
                 className="w-full border border-gray-400 rounded-r p-2 text-sm font-semibold text-black"
               />
-
             </div>
           </div>
 
@@ -160,9 +156,7 @@ export default function LoginClient() {
             <input
               type="password"
               value={password}
-              onChange={(e) =>
-                setPassword(e.target.value)
-              }
+              onChange={(e) => setPassword(e.target.value)}
               placeholder="Enter your password"
               required
               disabled={loading}
@@ -186,16 +180,13 @@ export default function LoginClient() {
             disabled={loading}
             className="w-full bg-blue-900 hover:bg-blue-800 text-white font-bold py-2 rounded text-sm disabled:opacity-50"
           >
-            {loading
-              ? "Logging in..."
-              : "Login"}
+            {loading ? "Logging in..." : "Login"}
           </button>
 
         </form>
 
         <p className="text-center text-xs text-gray-600 mt-4">
           Don't have an account?{" "}
-
           <a
             href="/register"
             className="text-red-600 font-bold hover:underline"
