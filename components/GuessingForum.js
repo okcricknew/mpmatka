@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react'
 import { db } from '../lib/firebase'
-import { collection, onSnapshot, addDoc, serverTimestamp, doc, deleteDoc, query, orderBy,
+import { collection, onSnapshot, doc, deleteDoc, query, orderBy,
 } from 'firebase/firestore'
 
 export default function GuessingForum({
@@ -212,10 +212,24 @@ const [isAdmin, setIsAdmin] = useState(false)
       setGuessText('')
       setQuotingPost(null)
 
-      await addDoc(collection(db, 'guessing_posts'), {
-        ...newPostPayload,
-        createdAt: serverTimestamp()
-      })
+      const response = await fetch('/api/guessing/posts', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  credentials: 'include',
+  body: JSON.stringify({
+    guess: newPostPayload.guess,
+    parsedData: newPostPayload.parsedData,
+    quotes: newPostPayload.quotes,
+  }),
+})
+
+const result = await response.json()
+
+if (!response.ok || !result.success) {
+  throw new Error(result.error || 'Post create nahi hua')
+}
     } catch (error) {
       alert('Error: ' + error.message)
     } finally {
