@@ -61,24 +61,27 @@ const [isAdmin, setIsAdmin] = useState(false)
 
   const permissions = currentUser.permissions || {}
 
+  const checkPerm = (value) =>
+    value === true || value === 'true'
+
   const isAdminUser =
-  currentUser.role === 'admin' ||
-  currentUser.is_admin === true
+    currentUser.role === 'admin' ||
+    checkPerm(currentUser.is_admin)
 
-const postingAllowed =
-  isAdminUser ||
-  (
-    currentUser.is_approved === true &&
+  const postingAllowed =
+    isAdminUser ||
     (
-      permissions.guessing_forum === true ||
-      permissions.market_update === true ||
-      permissions.add_results === true
+      checkPerm(currentUser.is_approved) &&
+      (
+        checkPerm(permissions.guessing_forum) ||
+        checkPerm(permissions.market_update) ||
+        checkPerm(permissions.add_results)
+      )
     )
-  )
 
-setCanPost(postingAllowed)
-setIsAdmin(isAdminUser)
-    
+  setCanPost(postingAllowed)
+  setIsAdmin(isAdminUser)
+
 }, [currentUser])
 
   const parseGuessText = (text) => {
