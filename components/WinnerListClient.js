@@ -14,7 +14,9 @@ export default function WinnerListClient({ initialPosts }) {
   const [closePanna, setClosePanna] = useState('')
 
   const [winners, setWinners] = useState([])
-  const [addedUsers, setAddedUsers] = useState({}) // Tracks added state per user/category
+  
+  // Track selected users for final publish list
+  const [selectedWinners, setSelectedWinners] = useState({})
 
   // Timestamp Formatter
   const formatTimestamp = (dateIsoStr) => {
@@ -36,7 +38,7 @@ export default function WinnerListClient({ initialPosts }) {
 
   const fullJodi = (openAnk && closeAnk) ? `${openAnk}${closeAnk}` : ''
 
-  // Accurate Match Logic
+  // Accurate Match Logic using parseGuessText output structure (`parsedData`)
   const handleCalculateWinners = (e) => {
     e.preventDefault();
 
@@ -61,22 +63,22 @@ export default function WinnerListClient({ initialPosts }) {
 
       // 1. Open Panna Check
       if (openPanna && (parsed.pannas?.includes(openPanna) || rawText.includes(openPanna))) {
-        matchTypes.push({ type: 'OPEN PANNA', val: openPanna, category: 'panna' });
+        matchTypes.push({ type: 'OPEN PANNA', val: openPanna, group: 'open' });
       }
 
       // 2. Open Ank Check
       if (openAnk && parsed.openAnks?.includes(openAnk)) {
-        matchTypes.push({ type: 'OPEN SINGLE', val: openAnk, category: 'open' });
+        matchTypes.push({ type: 'OPEN SINGLE', val: openAnk, group: 'open' });
       }
 
       // 3. Close Ank Check
       if (closeAnk && parsed.closeAnks?.includes(closeAnk)) {
-        matchTypes.push({ type: 'CLOSE SINGLE', val: closeAnk, category: 'close' });
+        matchTypes.push({ type: 'CLOSE SINGLE', val: closeAnk, group: 'close' });
       }
 
       // 4. Close Panna Check
       if (closePanna && (parsed.pannas?.includes(closePanna) || rawText.includes(closePanna))) {
-        matchTypes.push({ type: 'CLOSE PANNA', val: closePanna, category: 'panna' });
+        matchTypes.push({ type: 'CLOSE PANNA', val: closePanna, group: 'panna' });
       }
 
       // 5. Jodi Check
@@ -84,7 +86,7 @@ export default function WinnerListClient({ initialPosts }) {
         const jodiInParsed = parsed.jodi?.includes(fullJodi);
         const jodiRegex = new RegExp(`(?:^|\\D)${fullJodi}(?:\\D|$)`);
         if (jodiInParsed || jodiRegex.test(rawText)) {
-          matchTypes.push({ type: 'JODI WINNER', val: fullJodi, category: 'jodi' });
+          matchTypes.push({ type: 'JODI WINNER', val: fullJodi, group: 'jodi' });
         }
       }
 
@@ -101,29 +103,49 @@ export default function WinnerListClient({ initialPosts }) {
       }
     });
 
+    // Latest posts first
     matched.sort((a, b) => b.createdAtDate - a.createdAtDate);
     setWinners(matched);
-    setAddedUsers({}); // Reset additions on new calculation
+    setSelectedWinners({}); // Reset selections on new calculation
   };
 
-  const toggleAddUser = (userId, category) => {
-    const key = `${userId}-${category}`;
-    setAddedUsers(prev => ({
-      ...prev,
-      [key]: !prev[key]
-    }));
+  const toggleSelectWinner = (win) => {
+    setSelectedWinners(prev => {
+      const copy = { ...prev };
+      if (copy[win.id]) {
+        delete copy[win.id];
+      } else {
+        copy[win.id] = win;
+      }
+      return copy;
+    });
   };
 
   const uniqueMarkets = Array.from(
     new Set(posts.map(p => p.parsedData?.market || 'GENERAL'))
   );
 
-  // Group winners by category type ('open', 'close', 'panna', 'jodi')
-  const categorizedWinners = {
-    open: winners.filter(w => w.matches.some(m => m.category === 'open')),
-    close: winners.filter(w => w.matches.some(m => m.category === 'close')),
-    panna: winners.filter(w => w.matches.some(m => m.category === 'panna')),
-    jodi: winners.filter(w => w.matches.some(m => m.category === 'jodi')),
+  const selectedList = Object.values(selectedWinners);
+  const marketName = filterMarket !== 'ALL' ? filterMarket : 'MARKET';
+
+  const selectedOpenUsers = selectedList.filter(w => w.matches.some(m => m.group === 'open'));
+  const selectedCloseUsers = selectedList.filter(w => w.matches.some(m => m.group === 'close'));
+  const selectedPannaUsers = selectedList.filter(w => w.matches.some(m => m.group === 'panna'));
+  const selectedJodiUsers = selectedList.filter(w => w.matches.some(m => m.group === 'jodi'));
+
+  // Helper to format result combination line like "567-8"
+  const getOpenSubHeader = () => {
+    if (openPanna && openAnk) return `${openPanna}-${openAnk}`;
+    if (openPanna) return openPanna;
+    if (openAnk) return openAnk;
+    return '';
+  };
+
+  const getCloseSubHeader = () => {
+    if (closePanna && closeAnk) return `${closePanna}-${closeAnk}`;
+    if (closePanna) return closePanna;
+    if (closeAnk) return closeAnk;
+    return '';
   };
 
   return (
@@ -203,11 +225,11 @@ export default function WinnerListClient({ initialPosts }) {
         </button>
       </form>
 
-      {/* Results Section */}
-      <div className="mt-3 space-y-4">
+      {/* Results Section (Original UI Unchanged) */}
+      <div className="mt-3 space-y-2">
         <div className="bg-[#000080] text-yellow-300 py-1.5 px-2 font-bold flex justify-between items-center">
-          <span>{customHeading}</span>
-          <span>TOTAL MATCHES: {winners.length}</span>
+          <span>MATCHED RESULTS</span>
+          <span>TOTAL: {winners.length}</span>
         </div>
 
         {winners.length === 0 ? (
@@ -215,137 +237,151 @@ export default function WinnerListClient({ initialPosts }) {
             No winners found. Enter result numbers above and click "Find Winners".
           </div>
         ) : (
-          <div className="space-y-4">
-            
-            {/* 1. OPEN WINNERS SECTION */}
-            {openAnk && categorizedWinners.open.length > 0 && (
-              <div className="border border-orange-300 rounded p-2 bg-yellow-50/50">
-                <div className="font-extrabold text-black text-center border-b border-orange-300 pb-1 mb-2 uppercase">
-                  {filterMarket !== 'ALL' ? filterMarket : 'MARKET'} OPEN WINNERS ({openAnk})
-                </div>
-                <div className="space-y-2">
-                  {categorizedWinners.open.map(win => {
-                    const isAdded = addedUsers[`${win.id}-open`];
-                    return (
-                      <div key={`open-${win.id}`} className="bg-white border p-2 rounded flex justify-between items-center shadow-xs">
-                        <div>
-                          <div className="font-bold text-red-600">👤 {win.username}</div>
-                          <div className="text-[10px] text-gray-500">{win.formattedTime} | Market: {win.market}</div>
-                          <div className="text-gray-800 font-semibold mt-1">Guess: {win.originalGuess}</div>
-                        </div>
-                        <button 
-                          type="button"
-                          onClick={() => toggleAddUser(win.id, 'open')}
-                          className={`px-3 py-1 font-bold text-xs rounded cursor-pointer ${isAdded ? 'bg-green-600 text-white' : 'bg-gray-200 hover:bg-gray-300 text-black'}`}
-                        >
-                          {isAdded ? 'Added ✓' : '+ Add'}
-                        </button>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
+          <div className="space-y-2">
+            {winners.map((win) => {
+              const isSelected = !!selectedWinners[win.id];
+              return (
+                <div key={win.id} className="border border-orange-400 bg-white p-2 rounded shadow-sm">
+                  <div className="flex justify-between font-bold text-gray-700 border-b pb-1 mb-1 items-center">
+                    <span className="text-green-700">🕒 {win.formattedTime}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-red-600 uppercase">👤 {win.username}</span>
+                      <button
+                        type="button"
+                        onClick={() => toggleSelectWinner(win)}
+                        className={`px-2 py-0.5 rounded text-[10px] font-black cursor-pointer ${
+                          isSelected ? 'bg-green-600 text-white' : 'bg-gray-200 text-black hover:bg-gray-300'
+                        }`}
+                      >
+                        {isSelected ? 'Added ✓' : '+ Add'}
+                      </button>
+                    </div>
+                  </div>
 
-            {/* 2. CLOSE WINNERS SECTION */}
-            {closeAnk && categorizedWinners.close.length > 0 && (
-              <div className="border border-orange-300 rounded p-2 bg-yellow-50/50">
-                <div className="font-extrabold text-black text-center border-b border-orange-300 pb-1 mb-2 uppercase">
-                  {filterMarket !== 'ALL' ? filterMarket : 'MARKET'} CLOSE WINNERS ({closeAnk})
-                </div>
-                <div className="space-y-2">
-                  {categorizedWinners.close.map(win => {
-                    const isAdded = addedUsers[`${win.id}-close`];
-                    return (
-                      <div key={`close-${win.id}`} className="bg-white border p-2 rounded flex justify-between items-center shadow-xs">
-                        <div>
-                          <div className="font-bold text-red-600">👤 {win.username}</div>
-                          <div className="text-[10px] text-gray-500">{win.formattedTime} | Market: {win.market}</div>
-                          <div className="text-gray-800 font-semibold mt-1">Guess: {win.originalGuess}</div>
-                        </div>
-                        <button 
-                          type="button"
-                          onClick={() => toggleAddUser(win.id, 'close')}
-                          className={`px-3 py-1 font-bold text-xs rounded cursor-pointer ${isAdded ? 'bg-green-600 text-white' : 'bg-gray-200 hover:bg-gray-300 text-black'}`}
-                        >
-                          {isAdded ? 'Added ✓' : '+ Add'}
-                        </button>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
+                  <div className="flex flex-wrap gap-1 my-1">
+                    <span className="bg-blue-900 text-yellow-300 px-1 py-0.5 rounded text-[9px] font-bold">
+                      Market: {win.market}
+                    </span>
+                    {win.matches.map((m, i) => (
+                      <span key={i} className="bg-red-600 text-white px-1 py-0.5 rounded text-[9px] font-bold">
+                        {m.type}: {m.val}
+                      </span>
+                    ))}
+                  </div>
 
-            {/* 3. PANNA WINNERS SECTION */}
-            {(openPanna || closePanna) && categorizedWinners.panna.length > 0 && (
-              <div className="border border-orange-300 rounded p-2 bg-yellow-50/50">
-                <div className="font-extrabold text-black text-center border-b border-orange-300 pb-1 mb-2 uppercase">
-                  PANNA WINNERS
+                  <div className="bg-yellow-50 p-1.5 text-black font-bold whitespace-pre-wrap mt-1 border">
+                    {win.originalGuess}
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  {categorizedWinners.panna.map(win => {
-                    const isAdded = addedUsers[`${win.id}-panna`];
-                    return (
-                      <div key={`panna-${win.id}`} className="bg-white border p-2 rounded flex justify-between items-center shadow-xs">
-                        <div>
-                          <div className="font-bold text-red-600">👤 {win.username}</div>
-                          <div className="text-[10px] text-gray-500">{win.formattedTime} | Market: {win.market}</div>
-                          <div className="text-gray-800 font-semibold mt-1">Guess: {win.originalGuess}</div>
-                        </div>
-                        <button 
-                          type="button"
-                          onClick={() => toggleAddUser(win.id, 'panna')}
-                          className={`px-3 py-1 font-bold text-xs rounded cursor-pointer ${isAdded ? 'bg-green-600 text-white' : 'bg-gray-200 hover:bg-gray-300 text-black'}`}
-                        >
-                          {isAdded ? 'Added ✓' : '+ Add'}
-                        </button>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* 4. JODI WINNERS SECTION */}
-            {fullJodi && categorizedWinners.jodi.length > 0 && (
-              <div className="border border-orange-300 rounded p-2 bg-yellow-50/50">
-                <div className="font-extrabold text-black text-center border-b border-orange-300 pb-1 mb-2 uppercase">
-                  JODI WINNERS ({fullJodi})
-                </div>
-                <div className="space-y-2">
-                  {categorizedWinners.jodi.map(win => {
-                    const isAdded = addedUsers[`${win.id}-jodi`];
-                    return (
-                      <div key={`jodi-${win.id}`} className="bg-white border p-2 rounded flex justify-between items-center shadow-xs">
-                        <div>
-                          <div className="font-bold text-red-600">👤 {win.username}</div>
-                          <div className="text-[10px] text-gray-500">{win.formattedTime} | Market: {win.market}</div>
-                          <div className="text-gray-800 font-semibold mt-1">Guess: {win.originalGuess}</div>
-                        </div>
-                        <button 
-                          type="button"
-                          onClick={() => toggleAddUser(win.id, 'jodi')}
-                          className={`px-3 py-1 font-bold text-xs rounded cursor-pointer ${isAdded ? 'bg-green-600 text-white' : 'bg-gray-200 hover:bg-gray-300 text-black'}`}
-                        >
-                          {isAdded ? 'Added ✓' : '+ Add'}
-                        </button>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            <div className="text-center font-black text-red-600 pt-2 tracking-widest text-sm">
-              ✨ CONGRATULATIONS TO ALL WINNERS ✨
-            </div>
-
+              );
+            })}
           </div>
         )}
       </div>
 
+      {/* MATCHED IMAGE-STYLE PREVIEW UI */}
+      {selectedList.length > 0 && (
+        <div className="mt-5 border-2 border-cyan-500 bg-[#00ffff] p-4 rounded text-center shadow-md">
+          
+          {/* Open Winners List Styled Like Image */}
+          {selectedOpenUsers.length > 0 && (
+            <div className="mb-6">
+              <div className="text-red-600 font-black text-sm uppercase tracking-wide mb-1">
+                {marketName} OPEN WINNERS
+              </div>
+              {getOpenSubHeader() && (
+                <div className="text-red-600 font-bold text-xs mb-2">
+                  {getOpenSubHeader()}
+                </div>
+              )}
+              <div className="text-red-600 font-bold tracking-wider my-2">
+                ---------------------
+              </div>
+              <div className="space-y-1.5 text-red-600 font-bold text-xs">
+                {selectedOpenUsers.map((u, idx) => (
+                  <div key={idx}>*__{u.username}__*</div>
+                ))}
+              </div>
+              <div className="text-red-600 font-bold tracking-wider my-2">
+                ---------------------
+              </div>
+            </div>
+          )}
+
+          {/* Panna Winners List Styled Like Image */}
+          {selectedPannaUsers.length > 0 && (
+            <div className="mb-6">
+              <div className="text-red-600 font-black text-sm uppercase tracking-wide mb-2">
+                PANNA WINNERS
+              </div>
+              <div className="text-red-600 font-bold tracking-wider my-2">
+                ---------------------
+              </div>
+              <div className="space-y-1.5 text-red-600 font-bold text-xs">
+                {selectedPannaUsers.map((u, idx) => (
+                  <div key={idx}>*__{u.username}__*</div>
+                ))}
+              </div>
+              <div className="text-red-600 font-bold tracking-wider my-2">
+                ---------------------
+              </div>
+            </div>
+          )}
+
+          {/* Jodi Winners List Styled Like Image */}
+          {selectedJodiUsers.length > 0 && (
+            <div className="mb-6">
+              <div className="text-red-600 font-black text-sm uppercase tracking-wide mb-1">
+                JODI WINNERS
+              </div>
+              {fullJodi && (
+                <div className="text-red-600 font-bold text-xs mb-2">
+                  {fullJodi}
+                </div>
+              )}
+              <div className="text-red-600 font-bold tracking-wider my-2">
+                ---------------------
+              </div>
+              <div className="space-y-1.5 text-red-600 font-bold text-xs">
+                {selectedJodiUsers.map((u, idx) => (
+                  <div key={idx}>*__{u.username}__*</div>
+                ))}
+              </div>
+              <div className="text-red-600 font-bold tracking-wider my-2">
+                ---------------------
+              </div>
+            </div>
+          )}
+
+          {/* Close Winners List Styled Like Image */}
+          {selectedCloseUsers.length > 0 && (
+            <div className="mb-6">
+              <div className="text-red-600 font-black text-sm uppercase tracking-wide mb-1">
+                {marketName} CLOSE WINNERS
+              </div>
+              {getCloseSubHeader() && (
+                <div className="text-red-600 font-bold text-xs mb-2">
+                  {getCloseSubHeader()}
+                </div>
+              )}
+              <div className="text-red-600 font-bold tracking-wider my-2">
+                ---------------------
+              </div>
+              <div className="space-y-1.5 text-red-600 font-bold text-xs">
+                {selectedCloseUsers.map((u, idx) => (
+                  <div key={idx}>*__{u.username}__*</div>
+                ))}
+              </div>
+              <div className="text-red-600 font-bold tracking-wider my-2">
+                ---------------------
+              </div>
+            </div>
+          )}
+
+        </div>
+      )}
+
     </div>
   )
                 }
-                
+                                                              
