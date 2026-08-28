@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 import { db } from '../lib/firebase-admin';
 import { revalidatePath } from 'next/cache';
 
@@ -103,7 +105,7 @@ const timeToMinutes = (time) => {
 // ======================================================
 async function getLiveResults() {
   try {
-    const snapshot = await db.collection('results').get();
+    const snapshot = await db.collection('market_results').get();
     const liveMap = {};
     
     snapshot.forEach((docSnap) => {
