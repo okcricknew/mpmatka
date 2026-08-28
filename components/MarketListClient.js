@@ -21,13 +21,15 @@ export default function MarketListClient({
   const [loading, setLoading] = useState(false);
   const isAdmin = initialIsAdmin;
 
-    // SERVER SE NAYA DATA AATE HI CLIENT STATE AUTO-SYNC HO JAYEGI
+  // SAFE MERGE LOGIC: Router refresh hone par naya state wipe-out nahi hoga
   useEffect(() => {
-    if (initialResults) {
-      setMarketResults(initialResults);
+    if (initialResults && Object.keys(initialResults).length > 0) {
+      setMarketResults((prev) => ({
+        ...prev,
+        ...initialResults,
+      }));
     }
   }, [initialResults]);
-  
 
   const handleNavigation = (marketName, type) => {
     const slug = marketName
@@ -177,22 +179,22 @@ export default function MarketListClient({
             </div>
 
             {/* SEPARATE UPDATE BUTTONS - Result aur Message ke liye alag-alag */}
-{isAdmin && ( 
-  <div className="flex justify-center gap-2 mt-2">
-              <button
-                onClick={() => handleOpenModal(item, "result")}
-                className="bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold px-3 py-1 rounded border border-red-800"
-              >
-                ✏️ UPDATE RESULT
-              </button>
-              <button
-                onClick={() => handleOpenModal(item, "message")}
-                className="bg-purple-700 hover:bg-purple-800 text-white text-[10px] font-bold px-3 py-1 rounded border border-purple-900"
-              >
-                💬 UPDATE MSG
-              </button>
-            </div>
-                  )}
+            {isAdmin && ( 
+              <div className="flex justify-center gap-2 mt-2">
+                <button
+                  onClick={() => handleOpenModal(item, "result")}
+                  className="bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold px-3 py-1 rounded border border-red-800"
+                >
+                  ✏️ UPDATE RESULT
+                </button>
+                <button
+                  onClick={() => handleOpenModal(item, "message")}
+                  className="bg-purple-700 hover:bg-purple-800 text-white text-[10px] font-bold px-3 py-1 rounded border border-purple-900"
+                >
+                  💬 UPDATE MSG
+                </button>
+              </div>
+            )}
           </div>
         );
       })}
@@ -287,5 +289,5 @@ export default function MarketListClient({
       )}
     </div>
   );
-                }
-        
+        }
+                        
