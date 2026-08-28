@@ -6,7 +6,8 @@ export default function GamesAndChartsZone() {
     { name: "MATKA GUESSING FORUM", path: "/guessing-forum" },
     { name: "CHATTING FORUM", path: "#" },
     { name: "WEEKLY JODI AND PANNA", path: "#" },
-    { name: "KHATRI FAVOURITE PANNA", path: "/khatri-favourite-panna" }
+    { name: "KHATRI FAVOURITE PANNA", path: "/khatri-favourite-panna" },
+    { name: "WINNER LIST", oath: "/winner-list" }
   ]
 
   const jodiCharts = [
