@@ -35,7 +35,7 @@ export default function WinnerListClient({ initialPosts }) {
 
   const fullJodi = (openAnk && closeAnk) ? `${openAnk}${closeAnk}` : ''
 
-  // Accurate Match Logic using parseGuessText output structure
+  // Accurate Match Logic using parseGuessText output structure (`parsedData`)
   const handleCalculateWinners = (e) => {
     e.preventDefault();
 
@@ -110,7 +110,7 @@ export default function WinnerListClient({ initialPosts }) {
   );
 
   return (
-    <div className="w-full max-w-xl mx-auto bg-white font-sans text-xs border border-orange-400 p-2 shadow-md">
+    <div className="w-full max-w-xl mx-auto bg-white font-sans text-xs border border-orange-400 p-2 shadow-md my-4">
       
       <div className="bg-yellow-400 text-black text-center py-2 font-black text-sm border-b border-orange-400 uppercase tracking-wider mb-2">
         🎯 WINNER FILTER TOOL
@@ -123,7 +123,7 @@ export default function WinnerListClient({ initialPosts }) {
             <select 
               value={filterMarket}
               onChange={(e) => setFilterMarket(e.target.value)}
-              className="w-full border p-1 uppercase bg-white font-bold rounded text-xs"
+              className="w-full border p-1 uppercase bg-white font-bold rounded text-xs text-black"
             >
               <option value="ALL">ALL MARKETS</option>
               {uniqueMarkets.map((m, idx) => (
@@ -138,7 +138,7 @@ export default function WinnerListClient({ initialPosts }) {
               type="text" 
               value={customHeading}
               onChange={(e) => setCustomHeading(e.target.value)}
-              className="w-full border p-1 uppercase bg-white font-bold rounded text-xs"
+              className="w-full border p-1 uppercase bg-white font-bold rounded text-xs text-black"
             />
           </div>
         </div>
@@ -152,7 +152,7 @@ export default function WinnerListClient({ initialPosts }) {
               placeholder="450" 
               value={openPanna}
               onChange={(e) => setOpenPanna(e.target.value)}
-              className="w-full border p-1 text-center font-bold text-xs bg-yellow-50 rounded"
+              className="w-full border p-1 text-center font-bold text-xs bg-yellow-50 rounded text-black"
             />
           </div>
           <div>
@@ -163,7 +163,7 @@ export default function WinnerListClient({ initialPosts }) {
               placeholder="9" 
               value={openAnk}
               onChange={(e) => setOpenAnk(e.target.value)}
-              className="w-full border p-1 text-center font-bold text-xs bg-yellow-50 rounded"
+              className="w-full border p-1 text-center font-bold text-xs bg-yellow-50 rounded text-black"
             />
           </div>
           <div>
@@ -174,7 +174,7 @@ export default function WinnerListClient({ initialPosts }) {
               placeholder="5" 
               value={closeAnk}
               onChange={(e) => setCloseAnk(e.target.value)}
-              className="w-full border p-1 text-center font-bold text-xs bg-yellow-50 rounded"
+              className="w-full border p-1 text-center font-bold text-xs bg-yellow-50 rounded text-black"
             />
           </div>
           <div>
@@ -185,7 +185,7 @@ export default function WinnerListClient({ initialPosts }) {
               placeholder="690" 
               value={closePanna}
               onChange={(e) => setClosePanna(e.target.value)}
-              className="w-full border p-1 text-center font-bold text-xs bg-yellow-50 rounded"
+              className="w-full border p-1 text-center font-bold text-xs bg-yellow-50 rounded text-black"
             />
           </div>
         </div>
@@ -241,4 +241,3 @@ export default function WinnerListClient({ initialPosts }) {
     </div>
   )
                 }
-                
