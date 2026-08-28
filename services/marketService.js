@@ -17,7 +17,7 @@ export async function getInitialMarketResults() {
   });
 
   try {
-    const snapshot = await db.collection("results").get();
+    const snapshot = await db.collection("market_results").get();
 
     snapshot.forEach((docSnap) => {
       const item = docSnap.data();
