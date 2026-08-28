@@ -1,31 +1,56 @@
-"use client";
+'use client'
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from 'react'
+import { db } from '@/lib/firebase' // Aapke project ka client firebase path
+import { collection, onSnapshot } from 'firebase/firestore'
+import { subscribeAdminStatus } from '@/utils/admins'
 
-export default function WinnerListClient({ initialPosts, initialMarkets }) {
-  const [posts] = useState(initialPosts || []);
-  const [filterMarket, setFilterMarket] = useState("ALL");
-  const [customHeading, setCustomHeading] = useState("TIME BAZAR OPEN WINNERS");
+export default function WinnerListClient({ initialPosts }) {
+  const [posts, setPosts] = useState(initialPosts || [])
+  const [isAdmin, setIsAdmin] = useState(false)
+  const [filterMarket, setFilterMarket] = useState('ALL')
+  const [customHeading, setCustomHeading] = useState('TIME BAZAR OPEN WINNERS')
 
   // Result Inputs
-  const [openPanna, setOpenPanna] = useState("");
-  const [openAnk, setOpenAnk] = useState("");
-  const [closeAnk, setCloseAnk] = useState("");
-  const [closePanna, setClosePanna] = useState("");
+  const [openPanna, setOpenPanna] = useState('')
+  const [openAnk, setOpenAnk] = useState('')
+  const [closeAnk, setCloseAnk] = useState('')
+  const [closePanna, setClosePanna] = useState('')
 
-  const [winners, setWinners] = useState([]);
-  const [selectedWinners, setSelectedWinners] = useState([]);
+  const [winners, setWinners] = useState([])
+  const [selectedWinners, setSelectedWinners] = useState([])
+
+  useEffect(() => {
+    return subscribeAdminStatus(setIsAdmin)
+  }, [])
+
+  // Realtime updates for posts if admin
+  useEffect(() => {
+    if (!isAdmin) return
+
+    const unsubscribe = onSnapshot(collection(db, 'guessing_posts'), (snapshot) => {
+      const list = []
+      snapshot.forEach(docSnap => {
+        const data = docSnap.data()
+        let createdAtIso = new Date().toISOString()
+        if (data.createdAt?.toDate) {
+          createdAtIso = data.createdAt.toDate().toISOString()
+        } else if (data.cachedTime) {
+          createdAtIso = new Date(data.cachedTime).toISOString()
+        }
+        list.push({ id: docSnap.id, ...data, createdAt: createdAtIso })
+      })
+      setPosts(list)
+    }, (err) => console.error("Winner list fetch error:", err))
+
+    return () => unsubscribe()
+  }, [isAdmin])
 
   // Timestamp Formatter
-  const formatTimestamp = (post) => {
-    let date = null;
-    if (post.createdAt) {
-      date = new Date(post.createdAt);
-    } else if (post.cachedTime) {
-      date = new Date(post.cachedTime);
-    }
-
-    if (!date || isNaN(date)) return "Just now";
+  const formatTimestamp = (dateIsoStr) => {
+    if (!dateIsoStr) return "Just now";
+    const date = new Date(dateIsoStr);
+    if (isNaN(date.getTime())) return "Just now";
 
     const day = String(date.getDate()).padStart(2, "0");
     const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -34,144 +59,145 @@ export default function WinnerListClient({ initialPosts, initialMarkets }) {
     let hours = date.getHours();
     const minutes = String(date.getMinutes()).padStart(2, "0");
     const ampm = hours >= 12 ? "PM" : "AM";
-    hours = hours % 12;
-    hours = hours ? hours : 12;
+    hours = hours % 12 || 12;
 
     return `${day}-${month}-${year} ${hours}:${minutes} ${ampm}`;
-  };
+  }
 
   // Result String Calculations
-  const fullJodi = openAnk && closeAnk ? `${openAnk}${closeAnk}` : "";
-
+  const fullJodi = (openAnk && closeAnk) ? `${openAnk}${closeAnk}` : ''
+  
   const displayResult = () => {
     if (openPanna && openAnk && closeAnk && closePanna) {
-      return `${openPanna}-${openAnk}${closeAnk}-${closePanna}`;
+      return `${openPanna}-${openAnk}${closeAnk}-${closePanna}`
     }
-    if (openPanna || openAnk) return `${openPanna || "***"}-${openAnk || "*"}`;
-    if (closeAnk || closePanna) return `${closeAnk || "*"}-${closePanna || "***"}`;
-    if (fullJodi) return fullJodi;
-    return "***-*";
-  };
+    if (openPanna || openAnk) return `${openPanna || '***'}-${openAnk || '*'}`
+    if (closeAnk || closePanna) return `${closeAnk || '*'}-${closePanna || '***'}`
+    if (fullJodi) return fullJodi
+    return '***-*'
+  }
 
-  // Filter Winners Logic
+  // Filter Winners Logic using your parser's structured data (`parsedData`)
   const calculateWinners = () => {
     if (!openPanna && !openAnk && !closeAnk && !closePanna) {
-      alert("Kripya kam se kam ek result field fill karein!");
-      return;
+      alert('Kripya kam se kam ek result field fill karein!')
+      return
     }
 
-    const matchedWinners = [];
+    const matchedWinners = []
 
-    posts.forEach((post) => {
-      const parsed = post.parsedData || {};
-      const postMarket = parsed.market || post.market || "GENERAL";
-      const rawGuessText = post.guess || "";
+    posts.forEach(post => {
+      const parsed = post.parsedData || {}
+      const postMarket = parsed.market || 'GENERAL'
+      const rawGuessText = post.guess || ''
 
-      if (filterMarket !== "ALL" && postMarket.toUpperCase() !== filterMarket.toUpperCase()) {
-        return;
+      if (filterMarket !== 'ALL' && postMarket.toUpperCase() !== filterMarket.toUpperCase()) {
+        return
       }
 
-      const matchTypes = [];
+      const matchTypes = []
 
-      // Open Panna Match
+      // 1. Open Panna Match
       if (openPanna && (parsed.pannas?.includes(openPanna) || rawGuessText.includes(openPanna))) {
-        matchTypes.push({ type: "OPEN PANNA", val: openPanna });
+        matchTypes.push({ type: 'OPEN PANNA', val: openPanna })
       }
 
-      // Open Single Match
-      if (openAnk && (parsed.openAnks?.includes(openAnk) || parsed.singleAnks?.includes(openAnk))) {
-        matchTypes.push({ type: "OPEN SINGLE", val: openAnk });
+      // 2. Open Single Match
+      if (openAnk && (parsed.openAnks?.includes(openAnk))) {
+        matchTypes.push({ type: 'OPEN SINGLE', val: openAnk })
       }
 
-      // Close Single Match
-      const hasExplicitCloseSingle =
-        parsed.closeAnks?.includes(closeAnk) ||
-        parsed.singleAnks?.includes(closeAnk) ||
-        new RegExp(`(?:close|c)[:\\s-]*${closeAnk}\\b`, "i").test(rawGuessText);
-
-      if (closeAnk && hasExplicitCloseSingle) {
-        matchTypes.push({ type: "CLOSE SINGLE", val: closeAnk });
+      // 3. Close Single Match
+      if (closeAnk && (parsed.closeAnks?.includes(closeAnk))) {
+        matchTypes.push({ type: 'CLOSE SINGLE', val: closeAnk })
       }
 
-      // Close Panna Match
+      // 4. Close Panna Match
       if (closePanna && (parsed.pannas?.includes(closePanna) || rawGuessText.includes(closePanna))) {
-        matchTypes.push({ type: "CLOSE PANNA", val: closePanna });
+        matchTypes.push({ type: 'CLOSE PANNA', val: closePanna })
       }
 
-      // Jodi Winner Match
+      // 5. Jodi Winner Match
       if (fullJodi) {
-        const jodiInParsed = parsed.jodi?.includes(fullJodi) || parsed.jodis?.includes(fullJodi);
-        const jodiRegex = new RegExp(`(?:^|\\D)${fullJodi}(?:\\D|$)`);
-        const jodiInRawText = jodiRegex.test(rawGuessText);
+        const jodiInParsed = parsed.jodi?.includes(fullJodi)
+        const jodiRegex = new RegExp(`(?:^|\\D)${fullJodi}(?:\\D|$)`)
+        const jodiInRawText = jodiRegex.test(rawGuessText)
 
         if (jodiInParsed || jodiInRawText) {
-          matchTypes.push({ type: "JODI WINNER", val: fullJodi });
+          matchTypes.push({ type: 'JODI WINNER', val: fullJodi })
         }
       }
 
       if (matchTypes.length > 0) {
         matchedWinners.push({
           id: post.id,
-          username: post.username || "USER",
+          username: post.username || 'USER',
           market: postMarket,
           matches: matchTypes,
           originalGuess: post.guess,
-          formattedTime: formatTimestamp(post),
-          createdAt: post.createdAt ? new Date(post.createdAt) : new Date(0),
-        });
+          formattedTime: formatTimestamp(post.createdAt),
+          createdAtDate: new Date(post.createdAt || 0)
+        })
       }
-    });
+    })
 
-    matchedWinners.sort((a, b) => b.createdAt - a.createdAt);
-    setWinners(matchedWinners);
-  };
+    matchedWinners.sort((a, b) => b.createdAtDate - a.createdAtDate)
+    setWinners(matchedWinners)
+  }
 
   const handleAddWinner = (winner) => {
-    if (!selectedWinners.some((w) => w.id === winner.id)) {
-      setSelectedWinners([...selectedWinners, winner]);
+    if (!selectedWinners.some(w => w.id === winner.id)) {
+      setSelectedWinners([...selectedWinners, winner])
     }
-  };
+  }
 
   const handleRemoveWinner = (id) => {
-    setSelectedWinners(selectedWinners.filter((w) => w.id !== id));
-  };
+    setSelectedWinners(selectedWinners.filter(w => w.id !== id))
+  }
 
   const handleReset = () => {
-    setOpenPanna("");
-    setOpenAnk("");
-    setCloseAnk("");
-    setClosePanna("");
-    setWinners([]);
-    setSelectedWinners([]);
-  };
+    setOpenPanna('')
+    setOpenAnk('')
+    setCloseAnk('')
+    setClosePanna('')
+    setWinners([])
+    setSelectedWinners([])
+  }
 
   const uniqueMarkets = Array.from(
-    new Set(posts.map((p) => p.parsedData?.market || p.market || "GENERAL"))
-  );
+    new Set(posts.map(p => p.parsedData?.market || 'GENERAL'))
+  )
 
-  const openSingleWinnersList = selectedWinners.filter((w) =>
-    w.matches.some((m) => m.type === "OPEN SINGLE")
-  );
-  const openPannaWinnersList = selectedWinners.filter((w) =>
-    w.matches.some((m) => m.type === "OPEN PANNA")
-  );
-  const closeWinnersList = selectedWinners.filter((w) =>
-    w.matches.some((m) => m.type === "CLOSE SINGLE")
-  );
-  const jodiWinnersList = selectedWinners.filter((w) =>
-    w.matches.some((m) => m.type === "JODI WINNER")
-  );
-  const closePannaWinnersList = selectedWinners.filter((w) =>
-    w.matches.some((m) => m.type === "CLOSE PANNA")
-  );
+  const openSingleWinnersList = selectedWinners.filter(w => 
+    w.matches.some(m => m.type === 'OPEN SINGLE')
+  )
 
-  const isFullResultMode = Boolean(openPanna && openAnk && closeAnk && closePanna);
+  const openPannaWinnersList = selectedWinners.filter(w => 
+    w.matches.some(m => m.type === 'OPEN PANNA')
+  )
+
+  const closeWinnersList = selectedWinners.filter(w => 
+    w.matches.some(m => m.type === 'CLOSE SINGLE')
+  )
+
+  const jodiWinnersList = selectedWinners.filter(w => 
+    w.matches.some(m => m.type === 'JODI WINNER')
+  )
+
+  const closePannaWinnersList = selectedWinners.filter(w => 
+    w.matches.some(m => m.type === 'CLOSE PANNA')
+  )
+
+  const isFullResultMode = Boolean(openPanna && openAnk && closeAnk && closePanna)
+
+  if (!isAdmin) return null
 
   return (
     <div className="w-full mt-2 bg-[#F4F4F4] font-sans text-xs border border-orange-400 max-w-xl mx-auto">
+      
       {/* Header */}
       <div className="bg-yellow-400 text-black text-center py-1.5 font-black text-xs border-b border-orange-400 uppercase tracking-wider">
-        🏆 WINNER LIST FORUM (SSR) 🏆
+        🏆 WINNER LIST FORUM 🏆
       </div>
 
       {/* Control Panel */}
@@ -179,19 +205,17 @@ export default function WinnerListClient({ initialPosts, initialMarkets }) {
         <div className="grid grid-cols-2 gap-1.5 font-bold">
           <div>
             <label className="text-gray-800 block text-[10px] mb-0.5">Select Market:</label>
-            <select
+            <select 
               value={filterMarket}
               onChange={(e) => {
-                setFilterMarket(e.target.value);
-                if (e.target.value !== "ALL") setCustomHeading(`${e.target.value} OPEN WINNERS`);
+                setFilterMarket(e.target.value)
+                if (e.target.value !== 'ALL') setCustomHeading(`${e.target.value} OPEN WINNERS`)
               }}
               className="w-full border border-orange-400 rounded px-1 py-0.5 uppercase bg-white text-black font-bold text-xs"
             >
               <option value="ALL">ALL MARKETS</option>
               {uniqueMarkets.map((m, idx) => (
-                <option key={idx} value={m}>
-                  {m}
-                </option>
+                <option key={idx} value={m}>{m}</option>
               ))}
             </select>
           </div>
@@ -202,6 +226,7 @@ export default function WinnerListClient({ initialPosts, initialMarkets }) {
               type="text"
               value={customHeading}
               onChange={(e) => setCustomHeading(e.target.value)}
+              placeholder="e.g. TIME BAZAR OPEN WINNERS"
               className="w-full border border-orange-400 rounded px-1 py-0.5 uppercase bg-white text-black font-bold text-xs"
             />
           </div>
@@ -264,22 +289,19 @@ export default function WinnerListClient({ initialPosts, initialMarkets }) {
         {/* Action Buttons */}
         <div className="flex justify-between items-center pt-0.5">
           <div className="text-[11px] font-black text-black">
-            RESULT:{" "}
-            <span className="text-red-600 font-extrabold bg-yellow-200 px-1.5 py-0.5 rounded border border-orange-400">
-              {displayResult()}
-            </span>
+            RESULT: <span className="text-red-600 font-extrabold bg-yellow-200 px-1.5 py-0.5 rounded border border-orange-400">{displayResult()}</span>
           </div>
 
           <div className="flex gap-1.5">
             <button
               onClick={calculateWinners}
-              className="bg-green-600 hover:bg-green-700 text-white font-black text-[11px] px-3 py-1 rounded border border-black shadow"
+              className="bg-green-600 hover:bg-green-700 text-white font-black text-[11px] px-3 py-1 rounded border border-black shadow cursor-pointer"
             >
               FILTER WINNERS
             </button>
             <button
               onClick={handleReset}
-              className="bg-gray-500 hover:bg-gray-600 text-white font-bold text-[11px] px-2.5 py-1 rounded border border-black shadow"
+              className="bg-gray-500 hover:bg-gray-600 text-white font-bold text-[11px] px-2.5 py-1 rounded border border-black shadow cursor-pointer"
             >
               RESET
             </button>
@@ -287,20 +309,24 @@ export default function WinnerListClient({ initialPosts, initialMarkets }) {
         </div>
       </div>
 
-      {/* GENERATED SCREENSHOT CARD UI */}
+      {/* 📸 GENERATED SCREENSHOT CARD UI */}
       {selectedWinners.length > 0 && (
         <div className="p-2 bg-gray-200 border-b border-orange-400">
           <div className="text-center font-black text-[10px] mb-1 text-blue-900 uppercase">
             📸 GENERATED SCREENSHOT CARD UI
           </div>
-
+          
           <div className="w-full bg-[#00ffff] border-2 border-orange-500 p-3 text-center font-serif shadow-md my-1">
+            
             <h2 className="text-red-600 font-extrabold italic text-base tracking-wider uppercase mb-1">
-              {customHeading || "OPEN WINNERS"}
+              {customHeading || 'OPEN WINNERS'}
             </h2>
 
-            <div className="text-red-600 font-bold italic text-sm mb-2">{displayResult()}</div>
+            <div className="text-red-600 font-bold italic text-sm mb-2">
+              {displayResult()}
+            </div>
 
+            {/* PHASE 1: OPEN SESSION ONLY */}
             {!isFullResultMode && (
               <>
                 {openSingleWinnersList.length > 0 && (
@@ -314,7 +340,7 @@ export default function WinnerListClient({ initialPosts, initialMarkets }) {
                           </div>
                           <button
                             onClick={() => handleRemoveWinner(win.id)}
-                            className="ml-1.5 bg-red-600 text-white text-[8px] px-1 rounded font-sans uppercase not-italic"
+                            className="ml-1.5 bg-red-600 text-white text-[8px] px-1 rounded font-sans uppercase not-italic cursor-pointer"
                           >
                             X
                           </button>
@@ -337,7 +363,7 @@ export default function WinnerListClient({ initialPosts, initialMarkets }) {
                           </div>
                           <button
                             onClick={() => handleRemoveWinner(win.id)}
-                            className="ml-1.5 bg-red-600 text-white text-[8px] px-1 rounded font-sans uppercase not-italic"
+                            className="ml-1.5 bg-red-600 text-white text-[8px] px-1 rounded font-sans uppercase not-italic cursor-pointer"
                           >
                             X
                           </button>
@@ -349,6 +375,7 @@ export default function WinnerListClient({ initialPosts, initialMarkets }) {
               </>
             )}
 
+            {/* PHASE 2: FINAL RESULT MODE */}
             {isFullResultMode && (
               <>
                 {closeWinnersList.length > 0 && (
@@ -362,7 +389,7 @@ export default function WinnerListClient({ initialPosts, initialMarkets }) {
                           </div>
                           <button
                             onClick={() => handleRemoveWinner(win.id)}
-                            className="ml-1.5 bg-red-600 text-white text-[8px] px-1 rounded font-sans uppercase not-italic"
+                            className="ml-1.5 bg-red-600 text-white text-[8px] px-1 rounded font-sans uppercase not-italic cursor-pointer"
                           >
                             X
                           </button>
@@ -385,7 +412,7 @@ export default function WinnerListClient({ initialPosts, initialMarkets }) {
                           </div>
                           <button
                             onClick={() => handleRemoveWinner(win.id)}
-                            className="ml-1.5 bg-red-600 text-white text-[8px] px-1 rounded font-sans uppercase not-italic"
+                            className="ml-1.5 bg-red-600 text-white text-[8px] px-1 rounded font-sans uppercase not-italic cursor-pointer"
                           >
                             X
                           </button>
@@ -408,7 +435,7 @@ export default function WinnerListClient({ initialPosts, initialMarkets }) {
                           </div>
                           <button
                             onClick={() => handleRemoveWinner(win.id)}
-                            className="ml-1.5 bg-red-600 text-white text-[8px] px-1 rounded font-sans uppercase not-italic"
+                            className="ml-1.5 bg-red-600 text-white text-[8px] px-1 rounded font-sans uppercase not-italic cursor-pointer"
                           >
                             X
                           </button>
@@ -440,7 +467,7 @@ export default function WinnerListClient({ initialPosts, initialMarkets }) {
 
             <div className="space-y-2">
               {winners.map((win) => {
-                const isAdded = selectedWinners.some((w) => w.id === win.id);
+                const isAdded = selectedWinners.some(w => w.id === win.id);
                 return (
                   <div key={win.id} className="bg-white border border-orange-400 rounded shadow-sm overflow-hidden">
                     <div className="grid grid-cols-12 border-b border-orange-400 text-xs font-bold items-center">
@@ -454,24 +481,24 @@ export default function WinnerListClient({ initialPosts, initialMarkets }) {
                         <button
                           onClick={() => handleAddWinner(win)}
                           disabled={isAdded}
-                          className={`text-[10px] font-black px-1.5 py-0.5 rounded border ${
+                          className={`text-[10px] font-black px-1.5 py-0.5 rounded border cursor-pointer ${
                             isAdded
-                              ? "bg-gray-400 text-white cursor-not-allowed border-gray-400"
-                              : "bg-red-600 hover:bg-red-700 text-white border-black shadow"
+                              ? 'bg-gray-400 text-white cursor-not-allowed border-gray-400'
+                              : 'bg-red-600 hover:bg-red-700 text-white border-black shadow'
                           }`}
                         >
-                          {isAdded ? "ADDED" : "+ ADD"}
+                          {isAdded ? 'ADDED' : '+ ADD'}
                         </button>
                       </div>
                     </div>
 
                     <div className="p-1.5 bg-yellow-50 border-b border-gray-200 flex flex-wrap gap-1">
                       <span className="bg-blue-800 text-yellow-300 text-[9px] font-black px-1.5 py-0.5 rounded uppercase">
-                      📍 {win.market}
+                        📍 {win.market}
                       </span>
                       {win.matches.map((m, i) => (
-                        <span
-                          key={i}
+                        <span 
+                          key={i} 
                           className="bg-red-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded uppercase"
                         >
                           🎯 {m.type}: {m.val}
@@ -485,12 +512,13 @@ export default function WinnerListClient({ initialPosts, initialMarkets }) {
                       </div>
                     </div>
                   </div>
-                );
+                )
               })}
             </div>
           </div>
         )}
       </div>
+
     </div>
-  );
+  )
 }
