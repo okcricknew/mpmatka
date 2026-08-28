@@ -7,7 +7,7 @@ export default function GamesAndChartsZone() {
     { name: "CHATTING FORUM", path: "#" },
     { name: "WEEKLY JODI AND PANNA", path: "#" },
     { name: "KHATRI FAVOURITE PANNA", path: "/khatri-favourite-panna" },
-    { name: "WINNER LIST", oath: "/winner-list" }
+    { name: "WINNER LIST", path: "/winner-list" }
   ]
 
   const jodiCharts = [
