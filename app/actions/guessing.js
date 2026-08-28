@@ -31,18 +31,26 @@ function parseGuessText(text) {
       if (cleanedMarket) market = cleanedMarket;
     }
 
-    const hyphenMatches = line.match(/(\d{3})\s*-\s*(\d{1})/g);
-    if (hyphenMatches) {
-      hyphenMatches.forEach(hm => {
-        const parts = hm.split('-').map(p => p.trim());
-        if (parts.length === 2) {
-          const pannaVal = parts[0];
-          const singleVal = parts[1];
-          if (!/^(\d)\1{2}$/.test(pannaVal)) pannas.push(pannaVal);
-          if (currentSession === 'OPEN') openAnks.push(singleVal);
-          else closeAnks.push(singleVal);
-        }
-      });
+    const separatorMatches = line.match(/\b\d{3}\b\s*[^0-9\s]+\s*\d\b/g);
+    if (separatorMatches) {
+  separatorMatches.forEach(sm => {
+    const parts = sm.match(/\d+/g);
+
+    if (parts && parts.length === 2) {
+      const pannaVal = parts[0];
+      const singleVal = parts[1];
+
+      if (!/^(\d)\1{2}$/.test(pannaVal)) {
+        pannas.push(pannaVal);
+      }
+
+      if (currentSession === 'OPEN') {
+        openAnks.push(singleVal);
+      } else {
+        closeAnks.push(singleVal);
+      }
+    }
+  });
     }
 
     const foundPannas = line.match(/\b\d{3}\b/g);
