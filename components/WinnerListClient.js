@@ -63,7 +63,7 @@ export default function WinnerListClient({ initialPosts }) {
 
       // 1. Open Panna Check
       if (openPanna && (parsed.pannas?.includes(openPanna) || rawText.includes(openPanna))) {
-        matchTypes.push({ type: 'OPEN PANNA', val: openPanna, group: 'open' });
+        matchTypes.push({ type: 'OPEN PANNA', val: openPanna, group: 'panna' });
       }
 
       // 2. Open Ank Check
@@ -129,11 +129,11 @@ export default function WinnerListClient({ initialPosts }) {
   const marketName = filterMarket !== 'ALL' ? filterMarket : 'MARKET';
 
   const selectedOpenUsers = selectedList.filter(w => w.matches.some(m => m.group === 'open'));
-  const selectedCloseUsers = selectedList.filter(w => w.matches.some(m => m.group === 'close'));
   const selectedPannaUsers = selectedList.filter(w => w.matches.some(m => m.group === 'panna'));
   const selectedJodiUsers = selectedList.filter(w => w.matches.some(m => m.group === 'jodi'));
+  const selectedCloseUsers = selectedList.filter(w => w.matches.some(m => m.group === 'close'));
 
-  // Helper to format result combination line like "567-8"
+  // Format combination like "567-8"
   const getOpenSubHeader = () => {
     if (openPanna && openAnk) return `${openPanna}-${openAnk}`;
     if (openPanna) return openPanna;
@@ -279,13 +279,13 @@ export default function WinnerListClient({ initialPosts }) {
         )}
       </div>
 
-      {/* MATCHED IMAGE-STYLE PREVIEW UI */}
+      {/* EXACT MATCHED IMAGE-STYLE PREVIEW UI */}
       {selectedList.length > 0 && (
-        <div className="mt-5 border-2 border-cyan-500 bg-[#00ffff] p-4 rounded text-center shadow-md">
+        <div className="mt-5 border-2 border-cyan-500 bg-[#00ffff] p-4 rounded text-center shadow-md space-y-6">
           
-          {/* Open Winners List Styled Like Image */}
+          {/* 1. Open Winners List */}
           {selectedOpenUsers.length > 0 && (
-            <div className="mb-6">
+            <div>
               <div className="text-red-600 font-black text-sm uppercase tracking-wide mb-1">
                 {marketName} OPEN WINNERS
               </div>
@@ -308,9 +308,9 @@ export default function WinnerListClient({ initialPosts }) {
             </div>
           )}
 
-          {/* Panna Winners List Styled Like Image */}
+          {/* 2. Panna Winners List */}
           {selectedPannaUsers.length > 0 && (
-            <div className="mb-6">
+            <div>
               <div className="text-red-600 font-black text-sm uppercase tracking-wide mb-2">
                 PANNA WINNERS
               </div>
@@ -328,9 +328,9 @@ export default function WinnerListClient({ initialPosts }) {
             </div>
           )}
 
-          {/* Jodi Winners List Styled Like Image */}
+          {/* 3. Jodi Winners List */}
           {selectedJodiUsers.length > 0 && (
-            <div className="mb-6">
+            <div>
               <div className="text-red-600 font-black text-sm uppercase tracking-wide mb-1">
                 JODI WINNERS
               </div>
@@ -353,9 +353,9 @@ export default function WinnerListClient({ initialPosts }) {
             </div>
           )}
 
-          {/* Close Winners List Styled Like Image */}
+          {/* 4. Close Winners List */}
           {selectedCloseUsers.length > 0 && (
-            <div className="mb-6">
+            <div>
               <div className="text-red-600 font-black text-sm uppercase tracking-wide mb-1">
                 {marketName} CLOSE WINNERS
               </div>
@@ -384,4 +384,4 @@ export default function WinnerListClient({ initialPosts }) {
     </div>
   )
                 }
-                                                              
+                                         
