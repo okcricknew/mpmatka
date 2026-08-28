@@ -14,6 +14,7 @@ export default function WinnerListClient({ initialPosts }) {
   const [closePanna, setClosePanna] = useState('')
 
   const [winners, setWinners] = useState([])
+  const [addedUsers, setAddedUsers] = useState({}) // Tracks added state per user/category
 
   // Timestamp Formatter
   const formatTimestamp = (dateIsoStr) => {
@@ -35,7 +36,7 @@ export default function WinnerListClient({ initialPosts }) {
 
   const fullJodi = (openAnk && closeAnk) ? `${openAnk}${closeAnk}` : ''
 
-  // Accurate Match Logic using parseGuessText output structure (`parsedData`)
+  // Accurate Match Logic
   const handleCalculateWinners = (e) => {
     e.preventDefault();
 
@@ -60,22 +61,22 @@ export default function WinnerListClient({ initialPosts }) {
 
       // 1. Open Panna Check
       if (openPanna && (parsed.pannas?.includes(openPanna) || rawText.includes(openPanna))) {
-        matchTypes.push({ type: 'OPEN PANNA', val: openPanna });
+        matchTypes.push({ type: 'OPEN PANNA', val: openPanna, category: 'panna' });
       }
 
       // 2. Open Ank Check
       if (openAnk && parsed.openAnks?.includes(openAnk)) {
-        matchTypes.push({ type: 'OPEN SINGLE', val: openAnk });
+        matchTypes.push({ type: 'OPEN SINGLE', val: openAnk, category: 'open' });
       }
 
       // 3. Close Ank Check
       if (closeAnk && parsed.closeAnks?.includes(closeAnk)) {
-        matchTypes.push({ type: 'CLOSE SINGLE', val: closeAnk });
+        matchTypes.push({ type: 'CLOSE SINGLE', val: closeAnk, category: 'close' });
       }
 
       // 4. Close Panna Check
       if (closePanna && (parsed.pannas?.includes(closePanna) || rawText.includes(closePanna))) {
-        matchTypes.push({ type: 'CLOSE PANNA', val: closePanna });
+        matchTypes.push({ type: 'CLOSE PANNA', val: closePanna, category: 'panna' });
       }
 
       // 5. Jodi Check
@@ -83,7 +84,7 @@ export default function WinnerListClient({ initialPosts }) {
         const jodiInParsed = parsed.jodi?.includes(fullJodi);
         const jodiRegex = new RegExp(`(?:^|\\D)${fullJodi}(?:\\D|$)`);
         if (jodiInParsed || jodiRegex.test(rawText)) {
-          matchTypes.push({ type: 'JODI WINNER', val: fullJodi });
+          matchTypes.push({ type: 'JODI WINNER', val: fullJodi, category: 'jodi' });
         }
       }
 
@@ -100,14 +101,30 @@ export default function WinnerListClient({ initialPosts }) {
       }
     });
 
-    // Latest posts first
     matched.sort((a, b) => b.createdAtDate - a.createdAtDate);
     setWinners(matched);
+    setAddedUsers({}); // Reset additions on new calculation
+  };
+
+  const toggleAddUser = (userId, category) => {
+    const key = `${userId}-${category}`;
+    setAddedUsers(prev => ({
+      ...prev,
+      [key]: !prev[key]
+    }));
   };
 
   const uniqueMarkets = Array.from(
     new Set(posts.map(p => p.parsedData?.market || 'GENERAL'))
   );
+
+  // Group winners by category type ('open', 'close', 'panna', 'jodi')
+  const categorizedWinners = {
+    open: winners.filter(w => w.matches.some(m => m.category === 'open')),
+    close: winners.filter(w => w.matches.some(m => m.category === 'close')),
+    panna: winners.filter(w => w.matches.some(m => m.category === 'panna')),
+    jodi: winners.filter(w => w.matches.some(m => m.category === 'jodi')),
+  };
 
   return (
     <div className="w-full max-w-xl mx-auto bg-white font-sans text-xs border border-orange-400 p-2 shadow-md my-4">
@@ -147,44 +164,32 @@ export default function WinnerListClient({ initialPosts }) {
           <div>
             <span className="text-[10px] font-bold block text-gray-600">Open Panna</span>
             <input 
-              type="text" 
-              maxLength="3" 
-              placeholder="450" 
-              value={openPanna}
-              onChange={(e) => setOpenPanna(e.target.value)}
+              type="text" maxLength="3" placeholder="450" 
+              value={openPanna} onChange={(e) => setOpenPanna(e.target.value)}
               className="w-full border p-1 text-center font-bold text-xs bg-yellow-50 rounded text-black"
             />
           </div>
           <div>
             <span className="text-[10px] font-bold block text-gray-600">Open Ank</span>
             <input 
-              type="text" 
-              maxLength="1" 
-              placeholder="9" 
-              value={openAnk}
-              onChange={(e) => setOpenAnk(e.target.value)}
+              type="text" maxLength="1" placeholder="9" 
+              value={openAnk} onChange={(e) => setOpenAnk(e.target.value)}
               className="w-full border p-1 text-center font-bold text-xs bg-yellow-50 rounded text-black"
             />
           </div>
           <div>
             <span className="text-[10px] font-bold block text-gray-600">Close Ank</span>
             <input 
-              type="text" 
-              maxLength="1" 
-              placeholder="5" 
-              value={closeAnk}
-              onChange={(e) => setCloseAnk(e.target.value)}
+              type="text" maxLength="1" placeholder="5" 
+              value={closeAnk} onChange={(e) => setCloseAnk(e.target.value)}
               className="w-full border p-1 text-center font-bold text-xs bg-yellow-50 rounded text-black"
             />
           </div>
           <div>
             <span className="text-[10px] font-bold block text-gray-600">Close Panna</span>
             <input 
-              type="text" 
-              maxLength="3" 
-              placeholder="690" 
-              value={closePanna}
-              onChange={(e) => setClosePanna(e.target.value)}
+              type="text" maxLength="3" placeholder="690" 
+              value={closePanna} onChange={(e) => setClosePanna(e.target.value)}
               className="w-full border p-1 text-center font-bold text-xs bg-yellow-50 rounded text-black"
             />
           </div>
@@ -199,10 +204,10 @@ export default function WinnerListClient({ initialPosts }) {
       </form>
 
       {/* Results Section */}
-      <div className="mt-3 space-y-2">
+      <div className="mt-3 space-y-4">
         <div className="bg-[#000080] text-yellow-300 py-1.5 px-2 font-bold flex justify-between items-center">
-          <span>MATCHED RESULTS</span>
-          <span>TOTAL: {winners.length}</span>
+          <span>{customHeading}</span>
+          <span>TOTAL MATCHES: {winners.length}</span>
         </div>
 
         {winners.length === 0 ? (
@@ -210,30 +215,132 @@ export default function WinnerListClient({ initialPosts }) {
             No winners found. Enter result numbers above and click "Find Winners".
           </div>
         ) : (
-          <div className="space-y-2">
-            {winners.map((win) => (
-              <div key={win.id} className="border border-orange-400 bg-white p-2 rounded shadow-sm">
-                <div className="flex justify-between font-bold text-gray-700 border-b pb-1 mb-1">
-                  <span className="text-green-700">🕒 {win.formattedTime}</span>
-                  <span className="text-red-600 uppercase">👤 {win.username}</span>
+          <div className="space-y-4">
+            
+            {/* 1. OPEN WINNERS SECTION */}
+            {openAnk && categorizedWinners.open.length > 0 && (
+              <div className="border border-orange-300 rounded p-2 bg-yellow-50/50">
+                <div className="font-extrabold text-black text-center border-b border-orange-300 pb-1 mb-2 uppercase">
+                  {filterMarket !== 'ALL' ? filterMarket : 'MARKET'} OPEN WINNERS ({openAnk})
                 </div>
-
-                <div className="flex flex-wrap gap-1 my-1">
-                  <span className="bg-blue-900 text-yellow-300 px-1 py-0.5 rounded text-[9px] font-bold">
-                    Market: {win.market}
-                  </span>
-                  {win.matches.map((m, i) => (
-                    <span key={i} className="bg-red-600 text-white px-1 py-0.5 rounded text-[9px] font-bold">
-                      {m.type}: {m.val}
-                    </span>
-                  ))}
-                </div>
-
-                <div className="bg-yellow-50 p-1.5 text-black font-bold whitespace-pre-wrap mt-1 border">
-                  {win.originalGuess}
+                <div className="space-y-2">
+                  {categorizedWinners.open.map(win => {
+                    const isAdded = addedUsers[`${win.id}-open`];
+                    return (
+                      <div key={`open-${win.id}`} className="bg-white border p-2 rounded flex justify-between items-center shadow-xs">
+                        <div>
+                          <div className="font-bold text-red-600">👤 {win.username}</div>
+                          <div className="text-[10px] text-gray-500">{win.formattedTime} | Market: {win.market}</div>
+                          <div className="text-gray-800 font-semibold mt-1">Guess: {win.originalGuess}</div>
+                        </div>
+                        <button 
+                          type="button"
+                          onClick={() => toggleAddUser(win.id, 'open')}
+                          className={`px-3 py-1 font-bold text-xs rounded cursor-pointer ${isAdded ? 'bg-green-600 text-white' : 'bg-gray-200 hover:bg-gray-300 text-black'}`}
+                        >
+                          {isAdded ? 'Added ✓' : '+ Add'}
+                        </button>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
-            ))}
+            )}
+
+            {/* 2. CLOSE WINNERS SECTION */}
+            {closeAnk && categorizedWinners.close.length > 0 && (
+              <div className="border border-orange-300 rounded p-2 bg-yellow-50/50">
+                <div className="font-extrabold text-black text-center border-b border-orange-300 pb-1 mb-2 uppercase">
+                  {filterMarket !== 'ALL' ? filterMarket : 'MARKET'} CLOSE WINNERS ({closeAnk})
+                </div>
+                <div className="space-y-2">
+                  {categorizedWinners.close.map(win => {
+                    const isAdded = addedUsers[`${win.id}-close`];
+                    return (
+                      <div key={`close-${win.id}`} className="bg-white border p-2 rounded flex justify-between items-center shadow-xs">
+                        <div>
+                          <div className="font-bold text-red-600">👤 {win.username}</div>
+                          <div className="text-[10px] text-gray-500">{win.formattedTime} | Market: {win.market}</div>
+                          <div className="text-gray-800 font-semibold mt-1">Guess: {win.originalGuess}</div>
+                        </div>
+                        <button 
+                          type="button"
+                          onClick={() => toggleAddUser(win.id, 'close')}
+                          className={`px-3 py-1 font-bold text-xs rounded cursor-pointer ${isAdded ? 'bg-green-600 text-white' : 'bg-gray-200 hover:bg-gray-300 text-black'}`}
+                        >
+                          {isAdded ? 'Added ✓' : '+ Add'}
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* 3. PANNA WINNERS SECTION */}
+            {(openPanna || closePanna) && categorizedWinners.panna.length > 0 && (
+              <div className="border border-orange-300 rounded p-2 bg-yellow-50/50">
+                <div className="font-extrabold text-black text-center border-b border-orange-300 pb-1 mb-2 uppercase">
+                  PANNA WINNERS
+                </div>
+                <div className="space-y-2">
+                  {categorizedWinners.panna.map(win => {
+                    const isAdded = addedUsers[`${win.id}-panna`];
+                    return (
+                      <div key={`panna-${win.id}`} className="bg-white border p-2 rounded flex justify-between items-center shadow-xs">
+                        <div>
+                          <div className="font-bold text-red-600">👤 {win.username}</div>
+                          <div className="text-[10px] text-gray-500">{win.formattedTime} | Market: {win.market}</div>
+                          <div className="text-gray-800 font-semibold mt-1">Guess: {win.originalGuess}</div>
+                        </div>
+                        <button 
+                          type="button"
+                          onClick={() => toggleAddUser(win.id, 'panna')}
+                          className={`px-3 py-1 font-bold text-xs rounded cursor-pointer ${isAdded ? 'bg-green-600 text-white' : 'bg-gray-200 hover:bg-gray-300 text-black'}`}
+                        >
+                          {isAdded ? 'Added ✓' : '+ Add'}
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* 4. JODI WINNERS SECTION */}
+            {fullJodi && categorizedWinners.jodi.length > 0 && (
+              <div className="border border-orange-300 rounded p-2 bg-yellow-50/50">
+                <div className="font-extrabold text-black text-center border-b border-orange-300 pb-1 mb-2 uppercase">
+                  JODI WINNERS ({fullJodi})
+                </div>
+                <div className="space-y-2">
+                  {categorizedWinners.jodi.map(win => {
+                    const isAdded = addedUsers[`${win.id}-jodi`];
+                    return (
+                      <div key={`jodi-${win.id}`} className="bg-white border p-2 rounded flex justify-between items-center shadow-xs">
+                        <div>
+                          <div className="font-bold text-red-600">👤 {win.username}</div>
+                          <div className="text-[10px] text-gray-500">{win.formattedTime} | Market: {win.market}</div>
+                          <div className="text-gray-800 font-semibold mt-1">Guess: {win.originalGuess}</div>
+                        </div>
+                        <button 
+                          type="button"
+                          onClick={() => toggleAddUser(win.id, 'jodi')}
+                          className={`px-3 py-1 font-bold text-xs rounded cursor-pointer ${isAdded ? 'bg-green-600 text-white' : 'bg-gray-200 hover:bg-gray-300 text-black'}`}
+                        >
+                          {isAdded ? 'Added ✓' : '+ Add'}
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            <div className="text-center font-black text-red-600 pt-2 tracking-widest text-sm">
+              ✨ CONGRATULATIONS TO ALL WINNERS ✨
+            </div>
+
           </div>
         )}
       </div>
@@ -241,3 +348,4 @@ export default function WinnerListClient({ initialPosts }) {
     </div>
   )
                 }
+                
