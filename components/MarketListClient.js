@@ -69,11 +69,21 @@ export default function MarketListClient({
 
       // Agar Result update khula hai toh purana message retain rahega, aur agar Message khula hai toh purana result/time retain rahega
       const payload = {
-        name: marketName,
-        result: updateType === "result" ? newResult.trim() : (current.result || "140-55-140"),
-        time: updateType === "result" ? newTime.trim() : (current.time || selectedMarket.time),
-        message: updateType === "message" ? newMessage.trim() : (current.message || ""),
-      };
+  name: marketName,
+  updateType,
+
+  result: updateType === "result"
+    ? newResult.trim()
+    : undefined,
+
+  time: updateType === "result"
+    ? newTime.trim()
+    : undefined,
+
+  message: updateType === "message"
+    ? newMessage.trim()
+    : undefined,
+};
 
       const response = await fetch(
         "/api/results/update",
