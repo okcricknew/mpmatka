@@ -34,7 +34,7 @@ export default function GamesAndChartsZone({
     { name: "MILAN DAY PANNA CHART", path: "milan-day-panna-chart" },
     { name: "RAJDHANI DAY PANNA CHART", path: "/rajdhani-day-panna-chart" },
     { name: "SUPREME DAY PANNA CHART", path: "/supreme-day-panna-chart" },
-    { name: "KALYAN PANNA CHART", path: "/kalyan-panna-chart" },
+    { name: "KALYAN PANNA CHART", path: "/panna-chart/kalyan" },
     { name: "SRIDEVI PANNA JODI CHART", path: "/sridevi-night-panna-chart" },
     { name: "MILAN NIGHT PANNA CHART", path: "/milan-night-panna-chart" },
     { name: "KALYAN NIGHT PANNA CHART", path: "/kalyan-night-panna-chart" },
