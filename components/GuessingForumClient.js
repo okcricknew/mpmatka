@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react";
 import { createGuessPost, deleteGuessPost } from "@/app/actions/guessing";
+import GuessingWarning from "@/components/GuessingWarning";
 
 export default function GuessingForumClient({ user, isAdmin, canPost, posts }) {
   const [guessText, setGuessText] = useState("");
@@ -67,6 +68,7 @@ export default function GuessingForumClient({ user, isAdmin, canPost, posts }) {
       <div className="bg-yellow-400 text-black text-center py-2 font-black text-sm border-b border-orange-400 uppercase tracking-wider">
         * GUESSING FORUM *
       </div>
+  <GuessingWarning />
 
       {canPost ? (
         <form ref={postFormRef} onSubmit={handlePostGuess} className="p-2 bg-gray-100 border-b border-orange-400">
