@@ -59,9 +59,9 @@ function RenderJodi({ jodiStr }) {
   );
 }
 
-export default function KalyanPannaChartPage() {
+export default function KalyanPannaChartPage({ initialIsAdmin = false }) {
   const [chartRows, setChartRows] = useState([]);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(initialIsAdmin);
   const [loading, setLoading] = useState(false);
   const [showAdminForm, setShowAdminForm] = useState(false);
 
@@ -79,12 +79,13 @@ export default function KalyanPannaChartPage() {
     sat: { openPanna: '', jodi: '', closePanna: '' },
   });
 
-  // Check admin status from localStorage (same logic used in GamesAndChartsZone)
+  // Check admin status from localStorage (same as GamesAndChartsZone pattern)
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      setIsAdmin(localStorage.getItem('is_admin') === 'true');
+      const storedAdmin = localStorage.getItem('is_admin') === 'true';
+      setIsAdmin(initialIsAdmin || storedAdmin);
     }
-  }, []);
+  }, [initialIsAdmin]);
 
   // Real-time Firebase Fetch
   useEffect(() => {
@@ -178,6 +179,8 @@ export default function KalyanPannaChartPage() {
               Kalyan Panna Chart
             </h1>
           </div>
+          
+          {/* Admin Toggle Button matching GamesAndChartsZone style logic */}
           {isAdmin && (
             <button
               onClick={() => setShowAdminForm(!showAdminForm)}
@@ -247,9 +250,9 @@ export default function KalyanPannaChartPage() {
           </div>
         </div>
 
-        {/* Admin Form Section (Hidden by default, toggled via Admin button) */}
+        {/* Admin Form Section - Only shown when admin state is true and toggle is open */}
         {isAdmin && showAdminForm && (
-          <div className="bg-gray-50 border-t-2 border-black p-3 mt-2 animate-fadeIn">
+          <div className="bg-gray-50 border-t-2 border-black p-3 mt-2">
             <h3 className="text-xs font-bold text-red-600 mb-2 uppercase flex justify-between items-center">
               <span>Admin Panel: Add / Edit Weekly Row</span>
               <button
@@ -348,5 +351,5 @@ export default function KalyanPannaChartPage() {
       </div>
     </main>
   );
-              }
-                      
+          }
+                    
