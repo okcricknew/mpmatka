@@ -8,7 +8,7 @@ export const metadata = {
 
 export default function GuessingForumPage() {
   return (
-    <main className="w-full bg-[#f5f7fb] pb-10 m-0">
+    <main className="w-full max-w-full bg-[#f5f7fb] pb-10 m-0 box-border">
       <GuessingForum />
     </main>
   );
