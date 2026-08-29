@@ -1,4 +1,4 @@
-// app/panna-chart/kalyan/KalyanPannaChartClient.jsx
+// app/panna-chart/kalyan/KalyanPannaChartClient.js
 'use client';
 
 import { useState, useEffect } from 'react';
