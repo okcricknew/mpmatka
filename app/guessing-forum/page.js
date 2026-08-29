@@ -8,7 +8,8 @@ export const metadata = {
 
 export default function GuessingForumPage() {
   return (
-    <main className="w-full min-w-full min-w-0 bg-[#f5f7fb] pb-10 px-0 sm:px-0 m-0">
+    <main className="w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] bg-[#f5f7fb] pb-10 m-0">
+    
       <GuessingForum />
     </main>
   );
