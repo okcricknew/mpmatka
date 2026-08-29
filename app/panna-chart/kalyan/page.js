@@ -79,11 +79,17 @@ export default function KalyanPannaChartPage({ initialIsAdmin = false }) {
     sat: { openPanna: '', jodi: '', closePanna: '' },
   });
 
-  // Check admin status from localStorage (same as GamesAndChartsZone pattern)
+  // Safe client-side check using URL search params or cookies instead of localStorage
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const storedAdmin = localStorage.getItem('is_admin') === 'true';
-      setIsAdmin(initialIsAdmin || storedAdmin);
+    if (initialIsAdmin) {
+      setIsAdmin(true);
+      return;
+    }
+    
+    // URL query parameters check (e.g., ?admin=true) for clean SSR compliance
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('admin') === 'true') {
+      setIsAdmin(true);
     }
   }, [initialIsAdmin]);
 
@@ -148,7 +154,6 @@ export default function KalyanPannaChartPage({ initialIsAdmin = false }) {
       const docRef = doc(db, 'kalyan_panna_chart', docId);
       await setDoc(docRef, rowPayload, { merge: true });
       alert('Row saved/updated successfully!');
-      // Reset form and close panel
       setStartDate('');
       setEndDate('');
       setWeekData({
@@ -180,7 +185,7 @@ export default function KalyanPannaChartPage({ initialIsAdmin = false }) {
             </h1>
           </div>
           
-          {/* Admin Toggle Button matching GamesAndChartsZone style logic */}
+          {/* Admin Toggle Button (Appears only when props or query param indicates admin) */}
           {isAdmin && (
             <button
               onClick={() => setShowAdminForm(!showAdminForm)}
@@ -191,10 +196,9 @@ export default function KalyanPannaChartPage({ initialIsAdmin = false }) {
           )}
         </div>
 
-        {/* Main Table - Fixed width to fit screen completely without horizontal scroll */}
+        {/* Main Table */}
         <div className="w-full bg-white border border-black overflow-hidden">
           <div>
-            {/* Header Row */}
             <div className="grid grid-cols-[1.1fr_repeat(6,_1fr)] text-center font-black italic border-b border-black bg-white text-[10px] sm:text-sm py-1.5 uppercase">
               <div className="border-r border-black flex items-center justify-center">DATE</div>
               <div className="border-r border-black">MON</div>
@@ -205,7 +209,6 @@ export default function KalyanPannaChartPage({ initialIsAdmin = false }) {
               <div>SAT</div>
             </div>
 
-            {/* Data Rows */}
             {chartRows.length === 0 ? (
               <div className="text-center py-6 text-xs text-gray-500 font-bold italic">
                 No chart data available.
@@ -220,7 +223,6 @@ export default function KalyanPannaChartPage({ initialIsAdmin = false }) {
                   }`}
                   title={isAdmin ? "Click to edit this row in form below" : ""}
                 >
-                  {/* Date Column */}
                   <div className="border-r border-black py-1 px-0.5 text-center flex flex-col justify-center items-center leading-tight font-serif italic font-bold">
                     <span className="text-black text-[8px] sm:text-[10px] font-extrabold">{row.startDate}</span>
                     <span className="text-red-600 text-[7px] sm:text-[9px] font-extrabold">to</span>
@@ -228,7 +230,6 @@ export default function KalyanPannaChartPage({ initialIsAdmin = false }) {
                     {isAdmin && <span className="text-[6px] bg-red-600 text-white px-0.5 rounded mt-0.5">Edit ✏️</span>}
                   </div>
 
-                  {/* Days Data (Mon to Sat) */}
                   {daysList.map((dayKey, idx) => {
                     const dayObj = row.weekData?.[dayKey] || { openPanna: '', jodi: '', closePanna: '' };
                     return (
@@ -250,7 +251,7 @@ export default function KalyanPannaChartPage({ initialIsAdmin = false }) {
           </div>
         </div>
 
-        {/* Admin Form Section - Only shown when admin state is true and toggle is open */}
+        {/* Admin Form Section */}
         {isAdmin && showAdminForm && (
           <div className="bg-gray-50 border-t-2 border-black p-3 mt-2">
             <h3 className="text-xs font-bold text-red-600 mb-2 uppercase flex justify-between items-center">
@@ -276,7 +277,6 @@ export default function KalyanPannaChartPage({ initialIsAdmin = false }) {
             </h3>
 
             <form onSubmit={handleSave} className="flex flex-col gap-2">
-              {/* Dates Input */}
               <div className="flex gap-2 bg-white p-2 rounded border border-gray-300">
                 <div className="flex-1">
                   <label className="block text-[9px] font-bold text-gray-700 mb-0.5">START DATE (DD/MM/YYYY):</label>
@@ -302,7 +302,6 @@ export default function KalyanPannaChartPage({ initialIsAdmin = false }) {
                 </div>
               </div>
 
-              {/* Days Inputs Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-1.5 bg-white p-2 rounded border border-gray-300">
                 {daysList.map((day) => (
                   <div key={day} className="border p-1.5 rounded bg-gray-50 flex flex-col gap-1">
@@ -351,5 +350,4 @@ export default function KalyanPannaChartPage({ initialIsAdmin = false }) {
       </div>
     </main>
   );
-          }
-                    
+}
