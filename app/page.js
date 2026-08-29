@@ -26,7 +26,7 @@ export default async function HomePage() {
   initialIsAdmin={isAdmin}
 />
         <UserLoginRegister initialUser={currentUser} />
-    <GamesAndChartsZone />
+    <GamesAndChartsZone initialIsAdmin={isAdmin} />
       </div>
     </main>
   );
