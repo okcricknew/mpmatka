@@ -1,7 +1,7 @@
 // app/panna-chart/kalyan/page.js
 import KalyanPannaChartClient from './KalyanPannaChartClient';
 import { getCurrentUser } from '@/lib/auth-session';
-import { isUserAdmin } from '@/utils/admin';
+import { isUserAdmin } from '@/utils/admins';
 import { db as adminDb } from '@/lib/firebase-admin'; // Server-side firebase admin instance
 
 // Helper function to sort dates server-side
