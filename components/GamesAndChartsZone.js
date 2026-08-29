@@ -1,13 +1,17 @@
-import React from 'react'
-import Link from 'next/link' // ⬅️ React-router-dom ki jagah Next.js ka Link import kiya
+"use client";
 
-export default function GamesAndChartsZone() {
+import React from "react";
+import Link from "next/link";
+
+export default function GamesAndChartsZone({
+  initialIsAdmin = false,
+}) {
+  const isAdmin = initialIsAdmin;
   const dailyGames = [
     { name: "MATKA GUESSING FORUM", path: "/guessing-forum" },
     { name: "CHATTING FORUM", path: "#" },
     { name: "WEEKLY JODI AND PANNA", path: "#" },
-    { name: "KHATRI FAVOURITE PANNA", path: "/khatri-favourite-panna" },
-    { name: "WINNER LIST", path: "/winner-list" }
+    { name: "KHATRI FAVOURITE PANNA", path: "/khatri-favourite-panna" }
   ]
 
   const jodiCharts = [
@@ -140,6 +144,35 @@ export default function GamesAndChartsZone() {
             )
           ))}
         </div>
+
+                    {/* WINNER LIST - ADMIN ONLY */}
+        {isAdmin && (
+          <Link
+            href="/winner-list"
+            className="block w-full"
+          >
+            <div
+              className="w-full box-border"
+              style={{
+                color: "#000000",
+                fontSize: "16px",
+                borderRadius: "3px",
+                fontWeight: "bold",
+                padding: "10px",
+                textAlign: "center",
+                border: "2px solid #e70042",
+                backgroundColor: "#fff5f8",
+                boxShadow: "0 0 10px #461300",
+                marginTop: "5px",
+                marginBottom: "5px",
+                fontStyle: "italic",
+                fontFamily: "Helvetica Neue",
+              }}
+            >
+              ♦ ❖ WINNER LIST ❖ ♦
+            </div>
+          </Link>
+        )}
       </div>
 
       {/* 🔹 JODI CHARTS ZONE */}
