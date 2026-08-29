@@ -1,7 +1,7 @@
 // app/panna-chart/kalyan/page.js
 import KalyanPannaChartClient from './KalyanPannaChartClient';
 import { getCurrentUser } from '@/lib/auth-session';
-import { isUserAdmin } from '@/utils/admin'; // utils/admin bina change kiye yahan import kar liya
+import { isUserAdmin } from '@/utils/admins'; // utils/admin bina change kiye yahan import kar liya
 
 export default async function KalyanPannaChartPage() {
   const user = await getCurrentUser();
