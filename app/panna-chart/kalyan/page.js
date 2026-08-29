@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { db } from '@/lib/firebase'; // Ensure your client firebase config is correct
+import { db } from '@/lib/firebase';
 import { collection, onSnapshot, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 // Helper: Date ko timestamp me convert karke sort karne ke liye
@@ -63,6 +63,7 @@ export default function KalyanPannaChartPage() {
   const [chartRows, setChartRows] = useState([]);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showAdminForm, setShowAdminForm] = useState(false);
 
   const daysList = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
 
@@ -78,7 +79,7 @@ export default function KalyanPannaChartPage() {
     sat: { openPanna: '', jodi: '', closePanna: '' },
   });
 
-  // Check admin status from localStorage
+  // Check admin status from localStorage (same logic used in GamesAndChartsZone)
   useEffect(() => {
     if (typeof window !== 'undefined') {
       setIsAdmin(localStorage.getItem('is_admin') === 'true');
@@ -124,6 +125,7 @@ export default function KalyanPannaChartPage() {
         sat: row.weekData.sat || { openPanna: '', jodi: '', closePanna: '' },
       });
     }
+    setShowAdminForm(true);
     window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
   };
 
@@ -145,7 +147,7 @@ export default function KalyanPannaChartPage() {
       const docRef = doc(db, 'kalyan_panna_chart', docId);
       await setDoc(docRef, rowPayload, { merge: true });
       alert('Row saved/updated successfully!');
-      // Reset form
+      // Reset form and close panel
       setStartDate('');
       setEndDate('');
       setWeekData({
@@ -156,6 +158,7 @@ export default function KalyanPannaChartPage() {
         fri: { openPanna: '', jodi: '', closePanna: '' },
         sat: { openPanna: '', jodi: '', closePanna: '' },
       });
+      setShowAdminForm(false);
     } catch (error) {
       console.error('Error saving row:', error);
       alert('Error: ' + error.message);
@@ -169,10 +172,20 @@ export default function KalyanPannaChartPage() {
       <div className="w-full max-w-4xl mx-auto my-1 border-2 border-red-800 bg-yellow-400 p-0.5 shadow-md">
         
         {/* Header Banner */}
-        <div className="bg-yellow-400 py-2 border-b-2 border-black text-center">
-          <h1 className="text-red-600 text-xl sm:text-3xl font-black italic tracking-wider uppercase">
-            Kalyan Panna Chart
-          </h1>
+        <div className="bg-yellow-400 py-2 border-b-2 border-black flex justify-between items-center px-3">
+          <div className="flex-1 text-center">
+            <h1 className="text-red-600 text-xl sm:text-3xl font-black italic tracking-wider uppercase">
+              Kalyan Panna Chart
+            </h1>
+          </div>
+          {isAdmin && (
+            <button
+              onClick={() => setShowAdminForm(!showAdminForm)}
+              className="bg-red-600 hover:bg-red-700 text-white text-[11px] font-bold py-1.5 px-3 rounded shadow transition uppercase italic"
+            >
+              {showAdminForm ? 'Close Admin' : '⚙️ Admin Panel'}
+            </button>
+          )}
         </div>
 
         {/* Main Table - Fixed width to fit screen completely without horizontal scroll */}
@@ -234,31 +247,29 @@ export default function KalyanPannaChartPage() {
           </div>
         </div>
 
-        {/* Admin Form Section for Add / Edit */}
-        {isAdmin && (
-          <div className="bg-gray-50 border-t-2 border-black p-3 mt-2">
+        {/* Admin Form Section (Hidden by default, toggled via Admin button) */}
+        {isAdmin && showAdminForm && (
+          <div className="bg-gray-50 border-t-2 border-black p-3 mt-2 animate-fadeIn">
             <h3 className="text-xs font-bold text-red-600 mb-2 uppercase flex justify-between items-center">
               <span>Admin Panel: Add / Edit Weekly Row</span>
-              {(startDate || endDate) && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setStartDate('');
-                    setEndDate('');
-                    setWeekData({
-                      mon: { openPanna: '', jodi: '', closePanna: '' },
-                      tue: { openPanna: '', jodi: '', closePanna: '' },
-                      wed: { openPanna: '', jodi: '', closePanna: '' },
-                      thu: { openPanna: '', jodi: '', closePanna: '' },
-                      fri: { openPanna: '', jodi: '', closePanna: '' },
-                      sat: { openPanna: '', jodi: '', closePanna: '' },
-                    });
-                  }}
-                  className="text-[10px] bg-gray-600 text-white px-2 py-0.5 rounded"
-                >
-                  Clear Form / New Entry
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={() => {
+                  setStartDate('');
+                  setEndDate('');
+                  setWeekData({
+                    mon: { openPanna: '', jodi: '', closePanna: '' },
+                    tue: { openPanna: '', jodi: '', closePanna: '' },
+                    wed: { openPanna: '', jodi: '', closePanna: '' },
+                    thu: { openPanna: '', jodi: '', closePanna: '' },
+                    fri: { openPanna: '', jodi: '', closePanna: '' },
+                    sat: { openPanna: '', jodi: '', closePanna: '' },
+                  });
+                }}
+                className="text-[10px] bg-gray-600 text-white px-2 py-0.5 rounded"
+              >
+                Clear Form / New Entry
+              </button>
             </h3>
 
             <form onSubmit={handleSave} className="flex flex-col gap-2">
@@ -337,5 +348,5 @@ export default function KalyanPannaChartPage() {
       </div>
     </main>
   );
-                    }
-                    
+              }
+                      
