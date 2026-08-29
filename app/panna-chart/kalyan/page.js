@@ -2,9 +2,9 @@
 import { db } from '@/lib/firebase-admin';
 import { revalidatePath } from 'next/cache';
 
-async function updateKalyanPannaData(formData: FormData) {
+async function updateKalyanPannaData(formData) {
   'use server';
-  const chartData = formData.get('chartData') as string;
+  const chartData = formData.get('chartData');
 
   try {
     await db.collection('charts').doc('kalyan_panna').set({
@@ -41,7 +41,7 @@ export default async function KalyanPannaChartPage() {
           KALYAN PANNA CHART
         </div>
 
-        {/* Screenshot Jaisa Table UI */}
+        {/* Table UI */}
         <div className="overflow-x-auto">
           <table className="w-full border-collapse text-center">
             <thead>
@@ -99,5 +99,4 @@ export default async function KalyanPannaChartPage() {
       </div>
     </main>
   );
-          }
-
+}
