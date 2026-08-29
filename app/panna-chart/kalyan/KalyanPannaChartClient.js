@@ -56,8 +56,9 @@ function RenderJodi({ jodiStr }) {
   );
 }
 
-export default function KalyanPannaChartClient({ initialIsAdmin }) {
-  const [chartRows, setChartRows] = useState([]);
+export default function KalyanPannaChartClient({ initialIsAdmin, initialRows }) {
+  // 🚀 Server se mile initialRows se state initialize kiya
+  const [chartRows, setChartRows] = useState(initialRows || []);
   const [isAdmin] = useState(initialIsAdmin);
   const [loading, setLoading] = useState(false);
   const [showAdminForm, setShowAdminForm] = useState(false);
@@ -75,6 +76,7 @@ export default function KalyanPannaChartClient({ initialIsAdmin }) {
     sat: { openPanna: '', jodi: '', closePanna: '' },
   });
 
+  // Real-time listener taaki jab admin save kare toh live update ho jaye
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, 'kalyan_panna_chart'), (snapshot) => {
       const rows = [];
@@ -324,5 +326,5 @@ export default function KalyanPannaChartClient({ initialIsAdmin }) {
       </div>
     </main>
   );
-                    }
-        
+                  }
+                  
