@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { db } from '@/lib/firebase';
-import { collection, onSnapshot, doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, onSnapshot } from 'firebase/firestore';
 
 function parseDateStr(dateStr) {
   if (!dateStr) return 0;
@@ -128,18 +128,25 @@ export default function KalyanPannaChartClient({ initialIsAdmin, initialRows }) 
 
     setLoading(true);
     try {
-      const docId = `${startDate}_to_${endDate}`.replace(/\//g, '-');
-      const rowPayload = {
-        startDate,
-        endDate,
-        weekData,
-        updatedAt: serverTimestamp(),
-      };
+      const response = await fetch('/api/panna-chart/kalyan', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    startDate,
+    endDate,
+    weekData,
+  }),
+});
 
-      const docRef = doc(db, 'kalyan_panna_chart', docId);
-      await setDoc(docRef, rowPayload, { merge: true });
-      
-      alert('Row saved/updated successfully!');
+const result = await response.json();
+
+if (!response.ok) {
+  throw new Error(result.error || 'Failed to save chart data');
+}
+
+alert('Row saved/updated successfully!');
       setStartDate('');
       setEndDate('');
       setWeekData({
