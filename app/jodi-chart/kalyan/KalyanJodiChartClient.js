@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 
 function RenderJodi({ jodiStr }) {
   if (!jodiStr || jodiStr.trim() === '') {
-    return <span className="text-[12px] sm:text-[16px] font-bold text-transparent select-none">&nbsp;</span>;
+    return <span className="text-[18px] sm:text-[26px] font-bold text-transparent select-none">&nbsp;</span>;
   }
 
   const isRed =
@@ -14,7 +14,7 @@ function RenderJodi({ jodiStr }) {
     ['16', '61', '27', '72', '38', '83', '49', '94', '05', '50'].includes(jodiStr);
 
   return (
-    <span className={`text-[12px] sm:text-[16px] font-black tracking-tight italic font-serif ${isRed ? 'text-red-600' : 'text-black'}`}>
+    <span className={`text-[18px] sm:text-[26px] font-black tracking-tight italic font-serif ${isRed ? 'text-red-600' : 'text-black'}`}>
       {jodiStr}
     </span>
   );
