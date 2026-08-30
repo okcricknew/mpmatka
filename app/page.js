@@ -10,23 +10,26 @@ import LiveResults from "../components/LiveResults";
 import GamesAndChartsZone from "../components/GamesAndChartsZone";
 
 export default async function HomePage() {
-  const currentUser = await getCurrentUser();
-  const isAdmin = currentUser
-  ? isUserAdmin(currentUser.mobile)
-  : false;
-  const initialResults = await getInitialMarketResults();
+  // Promise.all se dono independent requests ek sath (parallel) run hongi,
+  // jisse server response time (TTFB) kafi fast ho jayega.
+  const [currentUser, initialResults] = await Promise.all([
+    getCurrentUser(),
+    getInitialMarketResults(),
+  ]);
+
+  const isAdmin = currentUser ? isUserAdmin(currentUser.mobile) : false;
 
   return (
     <main className="w-full max-w-none min-w-0 bg-[#f5f7fb] pb-10 px-1.5 sm:px-4 m-0">
       {/* Market Results List & User Login Section */}
       <div className="w-full max-w-none min-w-0 m-0 mt-2 p-0">
-    <LiveResults />
+        <LiveResults />
         <MarketListClient
-  initialResults={initialResults}
-  initialIsAdmin={isAdmin}
-/>
+          initialResults={initialResults}
+          initialIsAdmin={isAdmin}
+        />
         <UserLoginRegister initialUser={currentUser} />
-    <GamesAndChartsZone initialIsAdmin={isAdmin} />
+        <GamesAndChartsZone initialIsAdmin={isAdmin} />
       </div>
     </main>
   );
