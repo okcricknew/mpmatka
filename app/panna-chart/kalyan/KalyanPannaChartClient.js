@@ -75,19 +75,26 @@ export default function KalyanPannaChartClient({ initialIsAdmin, initialRows }) 
     sat: { openPanna: '', jodi: '', closePanna: '' },
   });
 
-  useEffect(() => {
+    useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, 'kalyan_panna_chart'), (snapshot) => {
       const rows = [];
       snapshot.forEach((docSnap) => {
         rows.push({ id: docSnap.id, ...docSnap.data() });
       });
-      const sorted = rows.sort((a, b) => parseDateStr(a.startDate) - parseDateStr(b.startDate));
+      
+      // Safe sorting logic
+      const sorted = rows.sort((a, b) => {
+        return parseDateStr(b.startDate) - parseDateStr(a.startDate); // Latest pehle ya purana pehle apne hisab se
+      });
+
       setChartRows(sorted);
     }, (error) => {
       console.error("Firestore snapshot error:", error);
     });
+
     return () => unsubscribe();
   }, []);
+  
 
   const handleDayChange = (day, field, value) => {
     setWeekData((prev) => ({
