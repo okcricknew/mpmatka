@@ -169,12 +169,12 @@ export default function MarketListClient({
                   {item.name}
                 </h3>
 
-                <p className="text-red-600 font-extrabold text-[22px] tracking-widest my-0.5">
+                <p className="text-red-600 font-extrabold text-[22px] tracking-widest mb-0">
                   {displayResult}
                 </p>
 
                 {liveData.message && (
-                  <p className="text-[15px] text-black font-bold leading-tight whitespace-pre-line mb-1">
+                  <p className="text-[24px] text-black italic font-bold leading-tight whitespace-pre-line mb-1">
                     {liveData.message}
                   </p>
                 )}
