@@ -180,11 +180,11 @@ export default function MarketListClient({
               {/* PANEL */}
               <button
                 onClick={() =>
-                  handleNavigation(item.name, "panel")
+                  handleNavigation(item.name, "panna")
                 }
                 className="bg-blue-900 hover:bg-blue-800 text-white text-[10px] font-bold px-3.5 py-1 rounded-full border border-blue-950 shadow-sm"
               >
-                PANEL
+                PANNEL
               </button>
             </div>
 
