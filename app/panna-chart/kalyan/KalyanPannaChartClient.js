@@ -117,6 +117,47 @@ export default function KalyanPannaChartClient({ initialIsAdmin, initialRows }) 
     window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
   };
 
+  const handleSeedImport = async () => {
+  if (!isAdmin) return;
+
+  const confirmed = window.confirm(
+    'Are you sure you want to import ALL Kalyan seed data into Firebase?'
+  );
+
+  if (!confirmed) return;
+
+  setLoading(true);
+
+  try {
+    const response = await fetch('/api/panna-chart/kalyan/seed', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        result.error || 'Failed to import seed data'
+      );
+    }
+
+    alert(
+      `Seed data imported successfully!\n\nRows saved: ${result.savedCount}`
+    );
+  } catch (error) {
+    console.error('Seed import error:', error);
+
+    alert(
+      `Seed Import Error: ${error.message}`
+    );
+  } finally {
+    setLoading(false);
+  }
+};
+
   const handleSave = async (e) => {
     e.preventDefault();
     if (!isAdmin) return;
@@ -178,13 +219,23 @@ alert('Row saved/updated successfully!');
           </div>
           
           {isAdmin && (
-            <button
-              onClick={() => setShowAdminForm(!showAdminForm)}
-              className="bg-red-600 hover:bg-red-700 text-white text-[11px] font-bold py-1.5 px-3 rounded shadow transition uppercase italic"
-            >
-              {showAdminForm ? 'Close Admin' : '⚙️ Admin Panel'}
-            </button>
-          )}
+  <div className="flex items-center gap-1">
+    <button
+      onClick={handleSeedImport}
+      disabled={loading}
+      className="bg-blue-600 hover:bg-blue-700 text-white text-[10px] sm:text-[11px] font-bold py-1.5 px-2 sm:px-3 rounded shadow transition uppercase italic disabled:opacity-50"
+    >
+      {loading ? 'Importing...' : '⬇️ Import Seed'}
+    </button>
+
+    <button
+      onClick={() => setShowAdminForm(!showAdminForm)}
+      className="bg-red-600 hover:bg-red-700 text-white text-[11px] font-bold py-1.5 px-3 rounded shadow transition uppercase italic"
+    >
+      {showAdminForm ? 'Close Admin' : '⚙️ Admin Panel'}
+    </button>
+  </div>
+)}
         </div>
 
         <div className="w-full bg-white border border-black overflow-hidden">
