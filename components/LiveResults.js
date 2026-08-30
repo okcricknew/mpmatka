@@ -68,7 +68,7 @@ const STATIC_MARKETS = [
   {
     id: 2,
     name: 'KALYAN NIGHT',
-    days: [1, 2, 3, 4, 5, 6],
+    days: [1, 2, 3, 4, 5],
     slots: [
       { open: '21:45', close: '23:59' }
     ]
@@ -76,7 +76,7 @@ const STATIC_MARKETS = [
   {
     id: 1,
     name: 'RAJDHANI NIGHT',
-    days: [1, 2, 3, 4, 5, 6],
+    days: [1, 2, 3, 4, 5],
     slots: [
       { open: '21:35', close: '23:45' }
     ]
@@ -84,7 +84,7 @@ const STATIC_MARKETS = [
   {
     id: 11,
     name: 'MAIN BAZAR',
-    days: [1, 2, 3, 4, 5, 6],
+    days: [1, 2, 3, 4, 5],
     slots: [
       { open: '22:00', close: '23:59' }
     ]
@@ -256,7 +256,7 @@ export default async function LiveResults() {
       {/* Header */}
       <div className="bg-yellow-400 text-black text-center py-1.5 border-b-2 border-red-600">
         <h2 className="font-extrabold text-[18px] tracking-wider italic">
-          * LIVE UPDATE *
+          * LIVE RESULTS UPDATE *
         </h2>
       </div>
 
