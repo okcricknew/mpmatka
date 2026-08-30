@@ -119,6 +119,12 @@ export default function MarketListClient({
   };
 
   return (
+    <div className="bg-[#0b668c] border-2 border-red-600 text-center py-2.5 px-4 my-1">
+      <h2 className="text-white font-bold text-base sm:text-lg tracking-wider m-0 font-sans">
+        ❊ MATKA RESULTS LIVE ❊
+      </h2>
+    </div>
+    
     <div className="w-full border-2 border-red-600 bg-white pt-2 pb-2">
       {STATIC_MARKETS.map((item) => {
         const liveData = marketResults[item.name] || {};
