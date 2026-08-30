@@ -19,7 +19,7 @@ export default async function KalyanJodiChartPage() {
     .collection('kalyan_panna_chart')
     .get();
 
-  // 2. Firebase data me se SIRF JODI nikalna
+  // 2. Firebase data me se SIRF JODI nikalna aur Old to New sort karna
   const initialRows = snapshot.docs
     .map((doc) => {
       const data = doc.data();
@@ -64,14 +64,14 @@ export default async function KalyanJodiChartPage() {
         ).getTime();
       };
 
-      return parseDate(b.startDate) - parseDate(a.startDate);
+      // Old to New sorting (Ascending order)
+      return parseDate(a.startDate) - parseDate(b.startDate);
     });
 
-  // 3. Client component ko sirf required data bhejna
+  // 3. Client component ko sorted data bhejna
   return (
     <KalyanJodiChartClient
       initialRows={initialRows}
     />
   );
 }
-
