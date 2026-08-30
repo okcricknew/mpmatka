@@ -117,22 +117,28 @@ export default function KalyanPannaChartClient({ initialIsAdmin, initialRows }) 
     window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
   };
 
-  const handleSave = async (e) => {
+    const handleSave = async (e) => {
     e.preventDefault();
     if (!isAdmin) return;
 
-    setLoading(true);
-    const docId = `${startDate}_to_${endDate}`.replace(/\//g, '-');
-    const rowPayload = {
-      startDate,
-      endDate,
-      weekData,
-      updatedAt: serverTimestamp(),
-    };
+    if (!startDate || !endDate) {
+      alert("Please enter both Start Date and End Date.");
+      return;
+    }
 
+    setLoading(true);
     try {
+      const docId = `${startDate}_to_${endDate}`.replace(/\//g, '-');
+      const rowPayload = {
+        startDate,
+        endDate,
+        weekData,
+        updatedAt: serverTimestamp(),
+      };
+
       const docRef = doc(db, 'kalyan_panna_chart', docId);
       await setDoc(docRef, rowPayload, { merge: true });
+      
       alert('Row saved/updated successfully!');
       setStartDate('');
       setEndDate('');
@@ -146,12 +152,14 @@ export default function KalyanPannaChartClient({ initialIsAdmin, initialRows }) 
       });
       setShowAdminForm(false);
     } catch (error) {
-      console.error('Error saving row:', error);
-      alert('Error: ' + error.message);
+      console.error('Error saving row to Firestore:', error);
+      // 🔥 Yeh line error ko seedha mobile screen par popup alert mein dikha degi
+      alert(`Firebase Error: ${error.message} (Code: ${error.code || 'unknown'})`);
     } finally {
       setLoading(false);
     }
   };
+  
 
   return (
     <main className="min-h-screen bg-gray-100 p-1 sm:p-3 font-sans flex flex-col items-center">
