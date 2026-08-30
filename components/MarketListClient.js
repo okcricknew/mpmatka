@@ -119,6 +119,7 @@ export default function MarketListClient({
   };
 
   return (
+    <div className="w-full">
     <div className="bg-[#0b668c] border-2 border-red-600 text-center py-2.5 px-4 my-1">
       <h2 className="text-white font-bold text-base sm:text-lg tracking-wider m-0 font-sans">
         ❊ MATKA RESULTS LIVE ❊
@@ -304,6 +305,7 @@ export default function MarketListClient({
         </div>
       )}
     </div>
+        </div>
   );
         }
                         
