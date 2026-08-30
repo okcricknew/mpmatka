@@ -40,7 +40,7 @@ function RenderVerticalPanna({ pannaStr }) {
 
 function RenderJodi({ jodiStr }) {
   if (!jodiStr || jodiStr.trim() === '') {
-    return <span className="text-[12px] sm:text-[16px] font-bold text-transparent select-none">&nbsp;</span>;
+    return <span className="text-[16px] sm:text-[20px] font-bold text-transparent select-none">&nbsp;</span>;
   }
 
   const isRed =
