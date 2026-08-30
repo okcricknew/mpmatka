@@ -120,7 +120,7 @@ export default function MarketListClient({
 
   return (
     <div className="w-full">
-    <div className="bg-[#02577c] text-white text-[30px] font-bold rounded-[5px] pb-[15px] text-center border-2 border-[#FFB90C] italic font-['Helvetica_Neue'] mt-[5px] mb-[5px]">
+    <div className="bg-[#02577c] text-white text-[20px] font-bold rounded-[0px] pb-[15px] text-center border-2 border-[#FFB90C] italic font-['Helvetica_Neue'] mt-[5px] mb-[5px]">
       <h2>
         ❊ MATKA RESULTS LIVE ❊
       </h2>
