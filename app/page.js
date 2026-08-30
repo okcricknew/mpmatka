@@ -22,7 +22,7 @@ export default async function HomePage() {
   const isAdmin = currentUser ? isUserAdmin(currentUser.mobile) : false;
 
   return (
-    <main className="w-full max-w-none min-w-0 min-h-screen bg-black py-10 px-1.5 sm:px-4 m-0">
+    <main className="w-full max-w-none min-w-0 min-h-screen bg-black py-2 px-1.5 sm:px-4 m-0">
       {/* Market Results List & User Login Section */}
       <div className="w-full max-w-none min-w-0 m-0 p-0">
     <Header />
