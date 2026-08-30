@@ -169,7 +169,7 @@ export default function MarketListClient({
                   {item.name}
                 </h3>
 
-                <p className="text-red-600 font-extrabold text-[22px] tracking-widest mb-0">
+                <p className="text-red-600 font-extrabold text-[22px] tracking-widest mb-0 relative -top-2">
                   {displayResult}
                 </p>
 
