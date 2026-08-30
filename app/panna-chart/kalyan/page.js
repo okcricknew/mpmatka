@@ -18,13 +18,21 @@ export default async function KalyanPannaChartPage() {
   const user = await getCurrentUser();
   const isAdmin = Boolean(user && (user.is_admin || isUserAdmin(user.mobile)));
 
-  // 🚀 Server par hi data fetch kar liya taaki refresh par data hide na ho
+  // Server par hi data fetch kar liya taaki refresh par data hide na ho
   let initialRows = [];
   try {
     const snapshot = await adminDb.collection('kalyan_panna_chart').get();
     const rows = [];
     snapshot.forEach((docSnap) => {
-      rows.push({ id: docSnap.id, ...docSnap.data() });
+      const data = docSnap.data();
+      rows.push({ 
+        id: docSnap.id, 
+        ...data,
+        // Firebase Timestamp ko plain value me convert karna zaroori hai taaki Next.js client error na de
+        updatedAt: data.updatedAt && typeof data.updatedAt.toMillis === 'function' 
+          ? data.updatedAt.toMillis() 
+          : null
+      });
     });
     initialRows = rows.sort((a, b) => parseDateStr(a.startDate) - parseDateStr(b.startDate));
   } catch (error) {
