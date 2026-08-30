@@ -32,12 +32,12 @@ export default function MarketListClient({
   }, [initialResults]);
 
   const handleNavigation = (marketName, type) => {
-    const slug = marketName
-      .toLowerCase()
-      .replace(/\s+/g, "-");
+  const slug = marketName
+    .toLowerCase()
+    .replace(/\s+/g, "-");
 
-    router.push(`/${slug}-${type}-chart`);
-  };
+  router.push(`/${type}-chart/${slug}`);
+};
 
   const handleOpenModal = (market, type) => {
     const current = marketResults[market.name] || {};
