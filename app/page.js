@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 import Header from "../components/Header";
+import Header1 from "../components/Header1";
 import { getCurrentUser } from "../lib/auth-session";
 import { isUserAdmin } from "../utils/admins";
 import MarketListClient from "../components/MarketListClient";
@@ -25,6 +26,7 @@ export default async function HomePage() {
       {/* Market Results List & User Login Section */}
       <div className="w-full max-w-none min-w-0 m-0 mt-2 p-0">
     <Header />
+    <Header1 />
         <LiveResults />
         <MarketListClient
           initialResults={initialResults}
