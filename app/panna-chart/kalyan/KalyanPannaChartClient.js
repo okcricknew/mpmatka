@@ -16,21 +16,21 @@ function parseDateStr(dateStr) {
 function RenderVerticalPanna({ pannaStr }) {
   if (!pannaStr || pannaStr.trim() === '') {
     return (
-      <div className="flex flex-col items-center justify-between h-[30px] sm:h-[40px] text-[8px] sm:text-[10px] font-bold text-transparent select-none">
+      <div className="flex flex-col items-center justify-between h-[36px] sm:h-[48px] text-[10px] sm:text-[13px] font-bold text-transparent select-none">
         <span>&nbsp;</span><span>&nbsp;</span><span>&nbsp;</span>
       </div>
     );
   }
   if (pannaStr === '*') {
     return (
-      <div className="flex flex-col items-center justify-between h-[30px] sm:h-[40px] text-[9px] sm:text-[11px] font-bold text-red-600">
+      <div className="flex flex-col items-center justify-between h-[36px] sm:h-[48px] text-[11px] sm:text-[14px] font-bold text-red-600">
         <span>*</span><span>*</span><span>*</span>
       </div>
     );
   }
   const digits = pannaStr.split('');
   return (
-    <div className="flex flex-col items-center justify-between h-[30px] sm:h-[40px] text-[8px] sm:text-[10px] font-black leading-none font-serif italic">
+    <div className="flex flex-col items-center justify-between h-[36px] sm:h-[48px] text-[10px] sm:text-[13px] font-black leading-none font-serif italic">
       {digits.map((d, idx) => (
         <span key={idx}>{d}</span>
       ))}
@@ -40,7 +40,7 @@ function RenderVerticalPanna({ pannaStr }) {
 
 function RenderJodi({ jodiStr }) {
   if (!jodiStr || jodiStr.trim() === '') {
-    return <span className="text-[16px] sm:text-[20px] font-bold text-transparent select-none">&nbsp;</span>;
+    return <span className="text-[18px] sm:text-[24px] font-bold text-transparent select-none">&nbsp;</span>;
   }
 
   const isRed =
@@ -49,7 +49,7 @@ function RenderJodi({ jodiStr }) {
     ['16', '61', '27', '72', '38', '83', '49', '94', '05', '50'].includes(jodiStr);
 
   return (
-    <span className={`text-[12px] sm:text-[16px] font-black tracking-tight italic font-serif ${isRed ? 'text-red-600' : 'text-black'}`}>
+    <span className={`text-[14px] sm:text-[19px] font-black tracking-tight italic font-serif ${isRed ? 'text-red-600' : 'text-black'}`}>
       {jodiStr}
     </span>
   );
@@ -407,5 +407,4 @@ export default function KalyanPannaChartClient({ initialIsAdmin, initialRows }) 
       </div>
     </main>
   );
-        }
-        
+}
