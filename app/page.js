@@ -3,6 +3,7 @@ export const revalidate = 0;
 
 import Header from "../components/Header";
 import Header1 from "../components/Header1";
+import Footer from "../components/Footer";
 import { getCurrentUser } from "../lib/auth-session";
 import { isUserAdmin } from "../utils/admins";
 import MarketListClient from "../components/MarketListClient";
@@ -34,6 +35,7 @@ export default async function HomePage() {
         />
         <UserLoginRegister initialUser={currentUser} />
         <GamesAndChartsZone initialIsAdmin={isAdmin} />
+            <Footer />
       </div>
     </main>
   );
