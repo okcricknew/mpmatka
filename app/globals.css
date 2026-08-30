@@ -15,7 +15,6 @@ body,
   padding: 0;
   width: 100%;
   min-height: 100%;
-  background: #f5f7fb;
   color: #111827;
   font-family: Arial, Helvetica, sans-serif;
   overflow-x: hidden;
@@ -23,6 +22,7 @@ body,
 
 body {
   min-height: 100vh;
+   background: #f5f7fb;
 }
 
 /* Ab baki sari styling aur spacing Tailwind classes (jaise w-full, px-4, py-2) khud sambhal legi! */
