@@ -1,4 +1,4 @@
-// app/panna-chart/kalyan/KalyanPannaChartClient.js
+// app/panna-chart/kalyan/KalyanPannaChartClient.jsx
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -57,7 +57,6 @@ function RenderJodi({ jodiStr }) {
 }
 
 export default function KalyanPannaChartClient({ initialIsAdmin, initialRows }) {
-  // 🚀 Server se mile initialRows se state initialize kiya
   const [chartRows, setChartRows] = useState(initialRows || []);
   const [isAdmin] = useState(initialIsAdmin);
   const [loading, setLoading] = useState(false);
@@ -76,7 +75,6 @@ export default function KalyanPannaChartClient({ initialIsAdmin, initialRows }) 
     sat: { openPanna: '', jodi: '', closePanna: '' },
   });
 
-  // Real-time listener taaki jab admin save kare toh live update ho jaye
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, 'kalyan_panna_chart'), (snapshot) => {
       const rows = [];
@@ -85,6 +83,8 @@ export default function KalyanPannaChartClient({ initialIsAdmin, initialRows }) 
       });
       const sorted = rows.sort((a, b) => parseDateStr(a.startDate) - parseDateStr(b.startDate));
       setChartRows(sorted);
+    }, (error) => {
+      console.error("Firestore snapshot error:", error);
     });
     return () => unsubscribe();
   }, []);
@@ -117,7 +117,7 @@ export default function KalyanPannaChartClient({ initialIsAdmin, initialRows }) 
     window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
   };
 
-    const handleSave = async (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
     if (!isAdmin) return;
 
@@ -153,13 +153,11 @@ export default function KalyanPannaChartClient({ initialIsAdmin, initialRows }) 
       setShowAdminForm(false);
     } catch (error) {
       console.error('Error saving row to Firestore:', error);
-      // 🔥 Yeh line error ko seedha mobile screen par popup alert mein dikha degi
       alert(`Firebase Error: ${error.message} (Code: ${error.code || 'unknown'})`);
     } finally {
       setLoading(false);
     }
   };
-  
 
   return (
     <main className="min-h-screen bg-gray-100 p-1 sm:p-3 font-sans flex flex-col items-center">
@@ -334,5 +332,5 @@ export default function KalyanPannaChartClient({ initialIsAdmin, initialRows }) 
       </div>
     </main>
   );
-                  }
-                  
+  }
+    
