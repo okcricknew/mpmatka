@@ -2,8 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { db } from '@/lib/firebase';
-import { collection, onSnapshot } from 'firebase/firestore';
+import { useRouter } from 'next/navigation';
 
 function parseDateStr(dateStr) {
   if (!dateStr) return 0;
@@ -75,25 +74,11 @@ export default function KalyanPannaChartClient({ initialIsAdmin, initialRows }) 
     sat: { openPanna: '', jodi: '', closePanna: '' },
   });
 
-    useEffect(() => {
-    const unsubscribe = onSnapshot(collection(db, 'kalyan_panna_chart'), (snapshot) => {
-      const rows = [];
-      snapshot.forEach((docSnap) => {
-        rows.push({ id: docSnap.id, ...docSnap.data() });
-      });
-      
-      // Safe sorting logic
-      const sorted = rows.sort((a, b) => {
-        return parseDateStr(b.startDate) - parseDateStr(a.startDate); // Latest pehle ya purana pehle apne hisab se
-      });
+    const router = useRouter();
 
-      setChartRows(sorted);
-    }, (error) => {
-      console.error("Firestore snapshot error:", error);
-    });
-
-    return () => unsubscribe();
-  }, []);
+useEffect(() => {
+  setChartRows(initialRows || []);
+}, [initialRows]);
   
 
   const handleDayChange = (day, field, value) => {
@@ -154,6 +139,7 @@ export default function KalyanPannaChartClient({ initialIsAdmin, initialRows }) 
     alert(
       `Seed data imported successfully!\n\nRows saved: ${result.savedCount}`
     );
+    router.refresh();
   } catch (error) {
     console.error('Seed import error:', error);
 
@@ -195,6 +181,7 @@ if (!response.ok) {
 }
 
 alert('Row saved/updated successfully!');
+      router.refresh();
       setStartDate('');
       setEndDate('');
       setWeekData({
