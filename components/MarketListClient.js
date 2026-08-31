@@ -177,14 +177,11 @@ export default function MarketListClient({
                     <p className="text-[24px] text-black italic font-bold leading-tight mb-1 drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.5)]">
   {text.split('\n').map((line, index) => (
     <React.Fragment key={index}>
-      {line}
+      {liveData.message}
       {index < text.split('\n').length - 1 && <br />}
     </React.Fragment>
   ))}
 </p>
-                    {liveData.message}
-                  </p>
-                )}
 
                 <span className="text-[16px] text-black font-semibold">
                   ({displayTime})
