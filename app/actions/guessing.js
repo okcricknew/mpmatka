@@ -1,4 +1,4 @@
-'use server'
+// 'use server'
 
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/firebase-admin";
@@ -33,24 +33,24 @@ function parseGuessText(text) {
 
     const separatorMatches = line.match(/\b\d{3}\b\s*[^0-9\s]+\s*\d\b/g);
     if (separatorMatches) {
-  separatorMatches.forEach(sm => {
-    const parts = sm.match(/\d+/g);
+      separatorMatches.forEach(sm => {
+        const parts = sm.match(/\d+/g);
 
-    if (parts && parts.length === 2) {
-      const pannaVal = parts[0];
-      const singleVal = parts[1];
+        if (parts && parts.length === 2) {
+          const pannaVal = parts[0];
+          const singleVal = parts[1];
 
-      if (!/^(\d)\1{2}$/.test(pannaVal)) {
-        pannas.push(pannaVal);
-      }
+          if (!/^(\d)\1{2}$/.test(pannaVal)) {
+            pannas.push(pannaVal);
+          }
 
-      if (currentSession === 'OPEN') {
-        openAnks.push(singleVal);
-      } else {
-        closeAnks.push(singleVal);
-      }
-    }
-  });
+          if (currentSession === 'OPEN') {
+            openAnks.push(singleVal);
+          } else {
+            closeAnks.push(singleVal);
+          }
+        }
+      });
     }
 
     const foundPannas = line.match(/\b\d{3}\b/g);
@@ -99,6 +99,50 @@ function parseGuessText(text) {
   };
 }
 
+// NEW: Server action to fetch paginated posts
+export async function fetchGuessPosts(page = 1, limit = 10) {
+  try {
+    const pageNum = Math.max(1, parseInt(page, 10));
+    const skip = (pageNum - 1) * limit;
+
+    const snapshot = await db.collection("guessing_posts")
+      .orderBy("createdAt", "desc")
+      .limit(limit)
+      .offset(skip)
+      .get();
+
+    const posts = snapshot.docs.map((doc) => {
+      const data = doc.data();
+      let createdAtIso = new Date().toISOString();
+
+      if (data.createdAt?.toDate) {
+        createdAtIso = data.createdAt.toDate().toISOString();
+      } else if (data.cachedTime) {
+        createdAtIso = new Date(data.cachedTime).toISOString();
+      }
+
+      return {
+        id: doc.id,
+        ...data,
+        createdAt: createdAtIso
+      };
+    });
+
+    const totalSnapshot = await db.collection("guessing_posts").count().get();
+    const totalPosts = totalSnapshot.data().count;
+    const totalPages = Math.ceil(totalPosts / limit) || 1;
+
+    return {
+      posts,
+      totalPages,
+      currentPage: pageNum,
+    };
+  } catch (err) {
+    console.error("fetchGuessPosts error:", err);
+    return { posts: [], totalPages: 1, currentPage: 1, error: err.message };
+  }
+}
+
 export async function createGuessPost(formData) {
   try {
     const user = await getCurrentUser();
@@ -107,8 +151,6 @@ export async function createGuessPost(formData) {
     const isAdmin = Boolean(isUserAdmin(user.mobile) || user.is_admin === true);
     const isApproved = user.is_approved === true || user.is_approved === "true";
 
-    // UPDATED PERMISSION LOGIC:
-    // User admin ho YA active (is_approved: true) ho, post kar sakta hai.
     if (!isAdmin && !isApproved) {
       throw new Error("Posting permission denied. Your account is deactivated.");
     }
