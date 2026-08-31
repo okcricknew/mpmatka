@@ -174,7 +174,7 @@ export default function MarketListClient({
                 </p>
 
                 {liveData.message && (
-  <p className="text-[24px] text-black italic font-bold leading-tight mb-1 drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.5)]">
+  <p className="text-[22px] text-black italic font-bold leading-tight mb-1 drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.5)]">
     {liveData.message.split(/\r?\n/).map((line, index, lines) => (
       <React.Fragment key={index}>
         {line}
