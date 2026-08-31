@@ -158,13 +158,13 @@ export default function MarketListClient({
                 onClick={() =>
                   handleNavigation(item.name, "jodi")
                 }
-                className="bg-blue-900 hover:bg-blue-800 text-white text-[10px] font-bold px-3.5 py-1 rounded-full border border-blue-950 shadow-sm"
+                className="bg-blue-900 hover:bg-blue-800 text-white text-[10px] font-bold px-3.5 py-1 rounded-full border border-blue-950 shadow-sm self-center"
               >
                 JODI
               </button>
 
               {/* CENTER */}
-              <div className="text-center flex-1 mx-1">
+              <div className="text-center flex-1 mx-2 min-w-0">
                 <h3 className="font-bold text-[25px] text-black tracking-wide">
                   {item.name}
                 </h3>
@@ -174,10 +174,10 @@ export default function MarketListClient({
                 </p>
 
                 {liveData.message && (
-  <p className="w-full text-center text-[24px] text-black italic font-bold leading-tight whitespace-pre-line mb-1 drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.5)]">
-    {liveData.message}
-  </p>
-)}
+                  <p className="w-full block text-center text-[24px] text-black italic font-bold leading-tight whitespace-pre-line mb-1 drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.5)]">
+                    {liveData.message}
+                  </p>
+                )}
 
                 <span className="text-[16px] text-black font-semibold">
                   ({displayTime})
@@ -189,7 +189,7 @@ export default function MarketListClient({
                 onClick={() =>
                   handleNavigation(item.name, "panna")
                 }
-                className="bg-blue-900 hover:bg-blue-800 text-white text-[10px] font-bold px-3.5 py-1 rounded-full border border-blue-950 shadow-sm"
+                className="bg-blue-900 hover:bg-blue-800 text-white text-[10px] font-bold px-3.5 py-1 rounded-full border border-blue-950 shadow-sm self-center"
               >
                 PANNEL
               </button>
@@ -307,5 +307,5 @@ export default function MarketListClient({
     </div>
         </div>
   );
-        }
-                        
+                    }
+                      
