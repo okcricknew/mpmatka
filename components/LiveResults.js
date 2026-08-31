@@ -14,6 +14,15 @@ const STATIC_MARKETS = [
     ]
   },
   {
+    id: 12,
+    name: 'RAKHI DAY',
+    days: [0, 1, 2, 3, 4, 5, 6],
+    slots: [
+      { open: '11:35', close: '11:55' },
+      { open: '12:35', close: '12:55' }
+    ]
+  },
+  {
     id: 4,
     name: 'TIME BAZAR',
     days: [1, 2, 3, 4, 5, 6],
@@ -63,6 +72,15 @@ const STATIC_MARKETS = [
     days: [0, 1, 2, 3, 4, 5, 6],
     slots: [
       { open: '19:15', close: '20:15' }
+    ]
+  },
+  {
+    id: 13,
+    name: 'RAKHI NIGHT',
+    days: [1, 2, 3, 4, 5, 6],
+    slots: [
+      { open: '19:35', close: '19:55' },
+      { open: '20:35', close: '20:55' }
     ]
   },
   {
