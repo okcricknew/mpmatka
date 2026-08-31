@@ -1,10 +1,10 @@
-'use client'
+'use client';
 
 import { useState, useRef } from "react";
 import { createGuessPost, deleteGuessPost } from "@/app/actions/guessing";
 import GuessingWarning from "@/components/GuessingWarning";
 
-export default function GuessingForumClient({ user, isAdmin, canPost, posts }) {
+export default function GuessingForumClient({ user, isAdmin, canPost, posts, totalPages = 1, currentPage = 1 }) {
   const [guessText, setGuessText] = useState("");
   const [quotingPost, setQuotingPost] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -68,7 +68,7 @@ export default function GuessingForumClient({ user, isAdmin, canPost, posts }) {
       <div className="bg-yellow-400 text-black text-center py-2 font-black text-sm border-b border-orange-400 uppercase tracking-wider">
         * GUESSING FORUM *
       </div>
-  <GuessingWarning />
+      <GuessingWarning />
 
       {canPost ? (
         <form ref={postFormRef} onSubmit={handlePostGuess} className="p-2 bg-gray-100 border-b border-orange-400">
@@ -228,7 +228,34 @@ export default function GuessingForumClient({ user, isAdmin, canPost, posts }) {
             })
         )}
       </div>
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="flex justify-center items-center gap-3 py-3 my-4 bg-white border-[3px] border-orange-400 [border-style:groove]">
+          <a
+            href={`?page=${currentPage - 1}`}
+            className={`px-3 py-1 bg-blue-900 text-yellow-300 font-bold text-xs rounded border border-orange-400 ${
+              currentPage <= 1 ? "pointer-events-none opacity-40" : "hover:bg-blue-800"
+            }`}
+          >
+            &laquo; Prev
+          </a>
+
+          <span className="text-xs font-bold text-black">
+            Page {currentPage} of {totalPages}
+          </span>
+
+          <a
+            href={`?page=${currentPage + 1}`}
+            className={`px-3 py-1 bg-blue-900 text-yellow-300 font-bold text-xs rounded border border-orange-400 ${
+              currentPage >= totalPages ? "pointer-events-none opacity-40" : "hover:bg-blue-800"
+            }`}
+          >
+            Next &raquo;
+          </a>
+        </div>
+      )}
     </div>
   );
                                                                            }
-
+                       
