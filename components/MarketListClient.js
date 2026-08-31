@@ -139,8 +139,8 @@ export default function MarketListClient({
         const isHighlighted = [
           "KALYAN",
           "MAIN BAZAR",
-          "SRIDEVI",
-          "SRIDEVI NIGHT",
+          "RAKHI DAY",
+          "RAKHI NIGHT",
         ].includes(item.name);
 
         return (
