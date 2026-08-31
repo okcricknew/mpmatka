@@ -1,46 +1,30 @@
-import { db } from "@/lib/firebase-admin";
 import { getCurrentUser } from "@/lib/auth-session";
 import { isUserAdmin } from "@/utils/admins";
 import GuessingForumClient from "./GuessingForumClient";
+import { fetchGuessPosts } from "@/app/actions/guessing";
 
-export default async function GuessingForum() {
+export default async function GuessingForum({ searchParams }) {
   const user = await getCurrentUser();
 
-  // Admin Check
   const isAdmin = user ? Boolean(isUserAdmin(user.mobile) || user.is_admin === true) : false;
-
-  // Simple Approved Check: String "true" ya Boolean true dono ko handle karega
   const isApproved = user?.is_approved === true || user?.is_approved === "true";
-
-  // UPDATED LOGIC: Sirf active (is_approved) ya Admin hone par posting allowed hai
   const canPost = Boolean(user && (isAdmin || isApproved));
 
+  const resolvedSearchParams = await searchParams;
+  const page = Number(resolvedSearchParams?.page) || 1;
+  const limit = 10;
+
   let posts = [];
+  let totalPages = 1;
+  let currentPage = 1;
+
   try {
-    const snapshot = await db
-      .collection("guessing_posts")
-      .orderBy("createdAt", "desc")
-      .limit(50)
-      .get();
-
-    posts = snapshot.docs.map((doc) => {
-      const data = doc.data();
-      let createdAtIso = new Date().toISOString();
-
-      if (data.createdAt?.toDate) {
-        createdAtIso = data.createdAt.toDate().toISOString();
-      } else if (data.cachedTime) {
-        createdAtIso = new Date(data.cachedTime).toISOString();
-      }
-
-      return {
-        id: doc.id,
-        ...data,
-        createdAt: createdAtIso
-      };
-    });
+    const result = await fetchGuessPosts(page, limit);
+    posts = result.posts || [];
+    totalPages = result.totalPages || 1;
+    currentPage = result.currentPage || 1;
   } catch (error) {
-    console.error("Firestore SSR Error in GuessingForum:", error);
+    console.error("Firestore SSR Pagination Error in GuessingForum:", error);
   }
 
   return (
@@ -49,6 +33,8 @@ export default async function GuessingForum() {
       isAdmin={isAdmin}
       canPost={canPost}
       posts={posts}
+      totalPages={totalPages}
+      currentPage={currentPage}
     />
   );
 }
