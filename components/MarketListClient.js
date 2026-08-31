@@ -81,7 +81,7 @@ export default function MarketListClient({
     : undefined,
 
   message: updateType === "message"
-    ? newMessage.trim()
+    ? newMessage
     : undefined,
 };
 
@@ -174,13 +174,8 @@ export default function MarketListClient({
                 </p>
 
                 {liveData.message && (
-  <p className="relative left-1/2 -translate-x-1/2 w-[calc(100vw-24px)] text-center text-[22px] text-black italic font-bold leading-tight mb-1 drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.5)]">
-    {liveData.message.split(/\r?\n/).map((line, index, lines) => (
-      <React.Fragment key={index}>
-        {line}
-        {index < lines.length - 1 && <br />}
-      </React.Fragment>
-    ))}
+  <p className="w-full text-center text-[24px] text-black italic font-bold leading-tight whitespace-pre-line mb-1 drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.5)]">
+    {liveData.message}
   </p>
 )}
 
@@ -312,4 +307,5 @@ export default function MarketListClient({
     </div>
         </div>
   );
-    }
+        }
+                        
