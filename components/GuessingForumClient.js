@@ -7,6 +7,7 @@ import {
   getGuessingForumPage
 } from "@/app/actions/guessing";
 import GuessingWarning from "@/components/GuessingWarning";
+import Footer from "@/components/Footer";
 
 export default function GuessingForumClient({
   user,
@@ -429,7 +430,9 @@ const postFormRef = useRef(null);
 
 </div>
       
+      <Footer />
       </div>
     </div>
+
   );
     }
