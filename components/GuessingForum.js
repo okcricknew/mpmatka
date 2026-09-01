@@ -1,46 +1,41 @@
-import { db } from "@/lib/firebase-admin";
 import { getCurrentUser } from "@/lib/auth-session";
 import { isUserAdmin } from "@/utils/admins";
+import { getGuessingForumPage } from "@/app/actions/guessing";
 import GuessingForumClient from "./GuessingForumClient";
 
 export default async function GuessingForum() {
   const user = await getCurrentUser();
 
-  // Admin Check
-  const isAdmin = user ? Boolean(isUserAdmin(user.mobile) || user.is_admin === true) : false;
+  const isAdmin = user
+    ? Boolean(
+        isUserAdmin(user.mobile) ||
+        user.is_admin === true
+      )
+    : false;
 
-  // Simple Approved Check: String "true" ya Boolean true dono ko handle karega
-  const isApproved = user?.is_approved === true || user?.is_approved === "true";
+  const isApproved =
+    user?.is_approved === true ||
+    user?.is_approved === "true";
 
-  // UPDATED LOGIC: Sirf active (is_approved) ya Admin hone par posting allowed hai
-  const canPost = Boolean(user && (isAdmin || isApproved));
+  const canPost = Boolean(
+    user && (isAdmin || isApproved)
+  );
 
-  let posts = [];
+  let forumData = {
+    posts: [],
+    nextCursor: null,
+    hasMore: false,
+    totalPosts: 0,
+    totalPages: 1
+  };
+
   try {
-    const snapshot = await db
-      .collection("guessing_posts")
-      .orderBy("createdAt", "desc")
-      .limit(50)
-      .get();
-
-    posts = snapshot.docs.map((doc) => {
-      const data = doc.data();
-      let createdAtIso = new Date().toISOString();
-
-      if (data.createdAt?.toDate) {
-        createdAtIso = data.createdAt.toDate().toISOString();
-      } else if (data.cachedTime) {
-        createdAtIso = new Date(data.cachedTime).toISOString();
-      }
-
-      return {
-        id: doc.id,
-        ...data,
-        createdAt: createdAtIso
-      };
-    });
+    forumData = await getGuessingForumPage();
   } catch (error) {
-    console.error("Firestore SSR Error in GuessingForum:", error);
+    console.error(
+      "Firestore SSR Error in GuessingForum:",
+      error
+    );
   }
 
   return (
@@ -48,7 +43,11 @@ export default async function GuessingForum() {
       user={user}
       isAdmin={isAdmin}
       canPost={canPost}
-      posts={posts}
+      posts={forumData.posts || []}
+      nextCursor={forumData.nextCursor || null}
+      hasMore={Boolean(forumData.hasMore)}
+      totalPosts={forumData.totalPosts || 0}
+      totalPages={forumData.totalPages || 1}
     />
   );
 }
