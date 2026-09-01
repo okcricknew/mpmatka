@@ -22,69 +22,55 @@ export default function GuessingForumClient({
 const [quotingPost, setQuotingPost] = useState(null);
 const [loading, setLoading] = useState(false);
 const [showOriginalPosts, setShowOriginalPosts] = useState(true);
-
 const [posts, setPosts] = useState(initialPosts || []);
-
 const [currentPage, setCurrentPage] = useState(1);
-
 const [pageCursors, setPageCursors] = useState({
-  1: null
+  1: null,
+  2: initialCursor || null
 });
-
-const [pageNextCursors, setPageNextCursors] = useState({
-  1: initialCursor || null
-});
-
 const [loadingPage, setLoadingPage] = useState(false);
-
 const postFormRef = useRef(null);
 
   const loadPage = async (pageNumber) => {
+  if (loadingPage) return;
+
   if (
-    loadingPage ||
     pageNumber < 1 ||
-    pageNumber > totalPages ||
-    pageNumber === currentPage
+    pageNumber > totalPages
   ) {
+    return;
+  }
+
+  if (pageNumber === currentPage) {
     return;
   }
 
   const cursor = pageCursors[pageNumber];
 
-  // Agar target page ka cursor abhi known nahi hai,
-  // pehle sequentially pages load karne padenge.
-  if (pageNumber > 1 && !cursor) {
+  if (
+    pageNumber > 1 &&
+    !cursor
+  ) {
+    alert(
+      "This page is not available yet. Please use NEXT to reach it."
+    );
     return;
   }
 
   setLoadingPage(true);
 
   try {
-    const result = await getGuessingForumPage(
-      cursor
-    );
+    const result =
+      await getGuessingForumPage(cursor);
 
     if (result?.error) {
-      alert(
-        "Failed to load page: " +
-        result.error
-      );
-      return;
+      throw new Error(result.error);
     }
 
-    const newPosts = result.posts || [];
-
-    setPosts(newPosts);
+    setPosts(result.posts || []);
 
     setCurrentPage(pageNumber);
 
-    setPageNextCursors((prev) => ({
-      ...prev,
-      [pageNumber]:
-        result.nextCursor || null
-    }));
-
-    // Next page ka cursor save karo.
     if (result.nextCursor) {
       setPageCursors((prev) => ({
         ...prev,
@@ -92,13 +78,18 @@ const postFormRef = useRef(null);
           result.nextCursor
       }));
     }
+
   } catch (error) {
     console.error(
-      "loadPage error:",
+      "Pagination error:",
       error
     );
 
-    alert("Failed to load page.");
+    alert(
+      "Failed to load posts: " +
+      error.message
+    );
+
   } finally {
     setLoadingPage(false);
   }
