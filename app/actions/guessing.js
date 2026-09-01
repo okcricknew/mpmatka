@@ -1,10 +1,124 @@
 'use server'
 
 import { revalidatePath } from "next/cache";
+import { FieldPath, Timestamp } from "firebase-admin/firestore";
 import { db } from "@/lib/firebase-admin";
 import { getCurrentUser } from "@/lib/auth-session";
 import { isUserAdmin } from "@/utils/admins";
 
+
+const GUESSING_PAGE_SIZE = 20;
+
+function serializeGuessPost(doc) {
+  const data = doc.data();
+
+  let createdAtIso = new Date().toISOString();
+
+  if (data.createdAt?.toDate) {
+    createdAtIso = data.createdAt.toDate().toISOString();
+  } else if (data.createdAt instanceof Date) {
+    createdAtIso = data.createdAt.toISOString();
+  } else if (data.cachedTime) {
+    const cachedDate = new Date(data.cachedTime);
+
+    if (!isNaN(cachedDate.getTime())) {
+      createdAtIso = cachedDate.toISOString();
+    }
+  }
+
+  return {
+    id: doc.id,
+    ...data,
+    createdAt: createdAtIso
+  };
+}
+
+export async function getGuessingForumPage(cursor = null) {
+  try {
+    let query = db
+      .collection("guessing_posts")
+      .orderBy("createdAt", "desc")
+      .orderBy(FieldPath.documentId(), "desc")
+      .limit(GUESSING_PAGE_SIZE + 1);
+
+    if (cursor?.createdAt && cursor?.id) {
+      const cursorDate = new Date(cursor.createdAt);
+
+      if (!isNaN(cursorDate.getTime())) {
+        query = query.startAfter(
+          Timestamp.fromDate(cursorDate),
+          cursor.id
+        );
+      }
+    }
+
+    const snapshot = await query.get();
+
+    const hasMore = snapshot.docs.length > GUESSING_PAGE_SIZE;
+
+    const docs = hasMore
+      ? snapshot.docs.slice(0, GUESSING_PAGE_SIZE)
+      : snapshot.docs;
+
+    const posts = docs.map(serializeGuessPost);
+
+    let nextCursor = null;
+
+    if (hasMore && docs.length > 0) {
+      const lastDoc = docs[docs.length - 1];
+      const lastData = lastDoc.data();
+
+      if (lastData.createdAt?.toDate) {
+        nextCursor = {
+          id: lastDoc.id,
+          createdAt: lastData.createdAt.toDate().toISOString()
+        };
+      } else if (lastData.createdAt instanceof Date) {
+        nextCursor = {
+          id: lastDoc.id,
+          createdAt: lastData.createdAt.toISOString()
+        };
+      }
+    }
+
+    // Exact total document count
+    const countSnapshot = await db
+      .collection("guessing_posts")
+      .count()
+      .get();
+
+    const totalPosts = Number(
+      countSnapshot.data().count || 0
+    );
+
+    const totalPages = Math.max(
+      1,
+      Math.ceil(totalPosts / GUESSING_PAGE_SIZE)
+    );
+
+    return {
+      posts,
+      nextCursor,
+      hasMore,
+      totalPosts,
+      totalPages
+    };
+  } catch (error) {
+    console.error(
+      "getGuessingForumPage error:",
+      error
+    );
+
+    return {
+      posts: [],
+      nextCursor: null,
+      hasMore: false,
+      totalPosts: 0,
+      totalPages: 1,
+      error: error.message
+    };
+  }
+}
 // Advanced Strict Panna & Jodi-to-Ank Parser (Server-side)
 function parseGuessText(text) {
   const normalizedText = text.replace(/__+/g, ' ');
