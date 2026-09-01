@@ -1,15 +1,158 @@
 'use client'
 
 import { useState, useRef } from "react";
-import { createGuessPost, deleteGuessPost } from "@/app/actions/guessing";
+import {
+  createGuessPost,
+  deleteGuessPost,
+  getGuessingForumPage
+} from "@/app/actions/guessing";
 import GuessingWarning from "@/components/GuessingWarning";
 
-export default function GuessingForumClient({ user, isAdmin, canPost, posts }) {
+export default function GuessingForumClient({
+  user,
+  isAdmin,
+  canPost,
+  posts: initialPosts,
+  nextCursor: initialCursor,
+  hasMore: initialHasMore,
+  totalPosts,
+  totalPages
+}) {
   const [guessText, setGuessText] = useState("");
-  const [quotingPost, setQuotingPost] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [showOriginalPosts, setShowOriginalPosts] = useState(true);
-  const postFormRef = useRef(null);
+const [quotingPost, setQuotingPost] = useState(null);
+const [loading, setLoading] = useState(false);
+const [showOriginalPosts, setShowOriginalPosts] = useState(true);
+
+const [posts, setPosts] = useState(initialPosts || []);
+
+const [currentPage, setCurrentPage] = useState(1);
+
+const [pageCursors, setPageCursors] = useState({
+  1: null
+});
+
+const [pageNextCursors, setPageNextCursors] = useState({
+  1: initialCursor || null
+});
+
+const [loadingPage, setLoadingPage] = useState(false);
+
+const postFormRef = useRef(null);
+
+  const loadPage = async (pageNumber) => {
+  if (
+    loadingPage ||
+    pageNumber < 1 ||
+    pageNumber > totalPages ||
+    pageNumber === currentPage
+  ) {
+    return;
+  }
+
+  const cursor = pageCursors[pageNumber];
+
+  // Agar target page ka cursor abhi known nahi hai,
+  // pehle sequentially pages load karne padenge.
+  if (pageNumber > 1 && !cursor) {
+    return;
+  }
+
+  setLoadingPage(true);
+
+  try {
+    const result = await getGuessingForumPage(
+      cursor
+    );
+
+    if (result?.error) {
+      alert(
+        "Failed to load page: " +
+        result.error
+      );
+      return;
+    }
+
+    const newPosts = result.posts || [];
+
+    setPosts(newPosts);
+
+    setCurrentPage(pageNumber);
+
+    setPageNextCursors((prev) => ({
+      ...prev,
+      [pageNumber]:
+        result.nextCursor || null
+    }));
+
+    // Next page ka cursor save karo.
+    if (result.nextCursor) {
+      setPageCursors((prev) => ({
+        ...prev,
+        [pageNumber + 1]:
+          result.nextCursor
+      }));
+    }
+  } catch (error) {
+    console.error(
+      "loadPage error:",
+      error
+    );
+
+    alert("Failed to load page.");
+  } finally {
+    setLoadingPage(false);
+  }
+};
+
+  const getPageNumbers = () => {
+  const pages = [];
+
+  const maxVisible = 7;
+
+  if (totalPages <= maxVisible) {
+    for (
+      let i = 1;
+      i <= totalPages;
+      i++
+    ) {
+      pages.push(i);
+    }
+
+    return pages;
+  }
+
+  pages.push(1);
+
+  let start = Math.max(
+    2,
+    currentPage - 2
+  );
+
+  let end = Math.min(
+    totalPages - 1,
+    currentPage + 2
+  );
+
+  if (start > 2) {
+    pages.push("...");
+  }
+
+  for (
+    let i = start;
+    i <= end;
+    i++
+  ) {
+    pages.push(i);
+  }
+
+  if (end < totalPages - 1) {
+    pages.push("...");
+  }
+
+  pages.push(totalPages);
+
+  return pages;
+};
 
   const handlePostGuess = async (e) => {
     e.preventDefault();
@@ -227,6 +370,67 @@ export default function GuessingForumClient({ user, isAdmin, canPost, posts }) {
               );
             })
         )}
+
+<div className="flex flex-wrap items-center justify-center gap-1 py-5 px-2 bg-white border-t-2 border-orange-400">
+
+  <button
+    type="button"
+    disabled={
+      currentPage === 1 ||
+      loadingPage
+    }
+    onClick={() =>
+      loadPage(currentPage - 1)
+    }
+    className="px-3 py-1 bg-gray-200 border border-black font-bold text-xs disabled:opacity-40 disabled:cursor-not-allowed hover:bg-yellow-300"
+  >
+    [PREV]
+  </button>
+
+  {getPageNumbers().map(
+    (page, index) =>
+      page === "..." ? (
+        <span
+          key={`dots-${index}`}
+          className="px-1 font-bold text-xs"
+        >
+          ...
+        </span>
+      ) : (
+        <button
+          key={page}
+          type="button"
+          disabled={loadingPage}
+          onClick={() =>
+            loadPage(page)
+          }
+          className={`min-w-[30px] px-2 py-1 border border-black font-bold text-xs ${
+            currentPage === page
+              ? "bg-red-600 text-white"
+              : "bg-white text-black hover:bg-yellow-300"
+          }`}
+        >
+          [{page}]
+        </button>
+      )
+  )}
+
+  <button
+    type="button"
+    disabled={
+      currentPage === totalPages ||
+      loadingPage
+    }
+    onClick={() =>
+      loadPage(currentPage + 1)
+    }
+    className="px-3 py-1 bg-gray-200 border border-black font-bold text-xs disabled:opacity-40 disabled:cursor-not-allowed hover:bg-yellow-300"
+  >
+    [NEXT]
+  </button>
+
+</div>
+      
       </div>
     </div>
   );
