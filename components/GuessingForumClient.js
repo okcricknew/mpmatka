@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   createGuessPost,
   deleteGuessPost,
@@ -30,6 +30,13 @@ const [pageCursors, setPageCursors] = useState({
 });
 const [loadingPage, setLoadingPage] = useState(false);
 const postFormRef = useRef(null);
+
+  useEffect(() => {
+  window.scrollTo({
+    top: 0,
+    behavior: "instant"
+  });
+}, [currentPage]);
 
   const loadPage = async (pageNumber) => {
   if (loadingPage) return;
