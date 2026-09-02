@@ -21,7 +21,7 @@ export default async function SrideviPannaChartPage() {
   // Server par hi data fetch kar liya taaki refresh par data hide na ho
   let initialRows = [];
   try {
-    const snapshot = await adminDb.collection('kalyan_panna_chart').get();
+    const snapshot = await adminDb.collection('sridevi_panna_chart').get();
     const rows = [];
     snapshot.forEach((docSnap) => {
       const data = docSnap.data();
