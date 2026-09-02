@@ -20,7 +20,7 @@ function RenderJodi({ jodiStr }) {
   );
 }
 
-export default function KalyanJodiChartClient({ initialRows }) {
+export default function SrideviJodiChartClient({ initialRows }) {
   const [chartRows, setChartRows] = useState(initialRows || []);
   const daysList = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
 
