@@ -1,5 +1,5 @@
 // app/panna-chart/sridevi/page.js
-import KalyanPannaChartClient from './SrideviPannaChartClient';
+import SrideviPannaChartClient from './SrideviPannaChartClient';
 import { getCurrentUser } from '@/lib/auth-session';
 import { isUserAdmin } from '@/utils/admins';
 import { db as adminDb } from '@/lib/firebase-admin'; // Server-side firebase admin instance
