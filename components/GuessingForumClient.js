@@ -154,26 +154,47 @@ const postFormRef = useRef(null);
 };
 
   const handlePostGuess = async (e) => {
-    e.preventDefault();
-    if (!guessText.trim() || !canPost) return;
+  e.preventDefault();
+  if (!guessText.trim() || !canPost) return;
 
-    setLoading(true);
-    const formData = new FormData();
-    formData.append("guessText", guessText);
-    if (quotingPost) {
-      formData.append("quotingPost", JSON.stringify(quotingPost));
-    }
+  setLoading(true);
 
-    const res = await createGuessPost(formData);
-    setLoading(false);
+  const formData = new FormData();
+  formData.append("guessText", guessText);
 
-    if (res?.error) {
-      alert("Error: " + res.error);
-    } else {
-      setGuessText("");
-      setQuotingPost(null);
-    }
-  };
+  if (quotingPost) {
+    formData.append(
+      "quotingPost",
+      JSON.stringify(quotingPost)
+    );
+  }
+
+  const res = await createGuessPost(formData);
+
+  setLoading(false);
+
+  if (res?.error) {
+    alert("Error: " + res.error);
+    return;
+  }
+
+  if (res?.success && res?.firstPage) {
+    // Fresh Page 1 data immediately show karo
+    setPosts(res.firstPage.posts || []);
+
+    // Page 1 par le jao
+    setCurrentPage(1);
+
+    // Page 2 ka fresh cursor set karo
+    setPageCursors({
+      1: null,
+      2: res.firstPage.nextCursor || null
+    });
+  }
+
+  setGuessText("");
+  setQuotingPost(null);
+};
 
   const handleDelete = async (postId) => {
     if (!isAdmin || !postId) return;
