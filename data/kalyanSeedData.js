@@ -1233,5 +1233,122 @@ export const kalyanSeedData = [
       sat: { openPanna: '168', jodi: '53', closePanna: '355' },
       sun: { openPanna: '', jodi: '', closePanna: '' }
     }
+  },
+  {
+    startDate: '26/08/2013',
+    endDate: '31/08/2013',
+    weekData: {
+      mon: { openPanna: '680', jodi: '46', closePanna: '448' },
+      tue: { openPanna: '690', jodi: '53', closePanna: '580' },
+      wed: { openPanna: '157', jodi: '39', closePanna: '239' },
+      thu: { openPanna: '469', jodi: '97', closePanna: '359' },
+      fri: { openPanna: '268', jodi: '60', closePanna: '190' },
+      sat: { openPanna: '234', jodi: '91', closePanna: '470' },
+      sun: { openPanna: '', jodi: '', closePanna: '' }
+    }
+  },
+  {
+    startDate: '02/09/2013',
+    endDate: '07/09/2013',
+    weekData: {
+      mon: { openPanna: '700', jodi: '75', closePanna: '339' },
+      tue: { openPanna: '368', jodi: '70', closePanna: '569' },
+      wed: { openPanna: '248', jodi: '28', closePanna: '369' },
+      thu: { openPanna: '338', jodi: '42', closePanna: '246' },
+      fri: { openPanna: '266', jodi: '45', closePanna: '799' },
+      sat: { openPanna: '799', jodi: '52', closePanna: '138' },
+      sun: { openPanna: '', jodi: '', closePanna: '' }
+    }
+  },
+  {
+    startDate: '09/09/2013',
+    endDate: '14/09/2013',
+    weekData: {
+      mon: { openPanna: '***', jodi: '**', closePanna: '***' },
+      tue: { openPanna: '370', jodi: '01', closePanna: '290' },
+      wed: { openPanna: '244', jodi: '07', closePanna: '359' },
+      thu: { openPanna: '260', jodi: '81', closePanna: '146' },
+      fri: { openPanna: '589', jodi: '20', closePanna: '145' },
+      sat: { openPanna: '446', jodi: '48', closePanna: '189' },
+      sun: { openPanna: '', jodi: '', closePanna: '' }
+    }
+  },
+  {
+    startDate: '16/09/2013',
+    endDate: '21/09/2013',
+    weekData: {
+      mon: { openPanna: '256', jodi: '31', closePanna: '236' },
+      tue: { openPanna: '458', jodi: '77', closePanna: '250' },
+      wed: { openPanna: '357', jodi: '55', closePanna: '168' },
+      thu: { openPanna: '679', jodi: '27', closePanna: '359' },
+      fri: { openPanna: '368', jodi: '77', closePanna: '179' },
+      sat: { openPanna: '570', jodi: '24', closePanna: '158' },
+      sun: { openPanna: '', jodi: '', closePanna: '' }
+    }
+  },
+  {
+    startDate: '23/09/2013',
+    endDate: '28/09/2013',
+    weekData: {
+      mon: { openPanna: '249', jodi: '54', closePanna: '680' },
+      tue: { openPanna: '379', jodi: '95', closePanna: '889' },
+      wed: { openPanna: '490', jodi: '30', closePanna: '127' },
+      thu: { openPanna: '467', jodi: '73', closePanna: '346' },
+      fri: { openPanna: '148', jodi: '30', closePanna: '569' },
+      sat: { openPanna: '140', jodi: '59', closePanna: '135' },
+      sun: { openPanna: '', jodi: '', closePanna: '' }
+    }
+  },
+  {
+    startDate: '30/09/2013',
+    endDate: '05/10/2013',
+    weekData: {
+      mon: { openPanna: '159', jodi: '57', closePanna: '340' },
+      tue: { openPanna: '690', jodi: '59', closePanna: '388' },
+      wed: { openPanna: '112', jodi: '41', closePanna: '560' },
+      thu: { openPanna: '367', jodi: '68', closePanna: '567' },
+      fri: { openPanna: '379', jodi: '94', closePanna: '130' },
+      sat: { openPanna: '779', jodi: '37', closePanna: '890' },
+      sun: { openPanna: '', jodi: '', closePanna: '' }
+    }
+  },
+  {
+    startDate: '07/10/2013',
+    endDate: '12/10/2013',
+    weekData: {
+      mon: { openPanna: '156', jodi: '22', closePanna: '390' },
+      tue: { openPanna: '389', jodi: '03', closePanna: '166' },
+      wed: { openPanna: '490', jodi: '33', closePanna: '256' },
+      thu: { openPanna: '578', jodi: '06', closePanna: '556' },
+      fri: { openPanna: '279', jodi: '80', closePanna: '127' },
+      sat: { openPanna: '278', jodi: '71', closePanna: '236' },
+      sun: { openPanna: '', jodi: '', closePanna: '' }
+    }
+  },
+  {
+    startDate: '14/10/2013',
+    endDate: '19/10/2013',
+    weekData: {
+      mon: { openPanna: '660', jodi: '29', closePanna: '126' },
+      tue: { openPanna: '289', jodi: '93', closePanna: '689' },
+      wed: { openPanna: '126', jodi: '97', closePanna: '557' },
+      thu: { openPanna: '157', jodi: '33', closePanna: '157' },
+      fri: { openPanna: '468', jodi: '86', closePanna: '790' },
+      sat: { openPanna: '468', jodi: '82', closePanna: '679' },
+      sun: { openPanna: '', jodi: '', closePanna: '' }
+    }
+  },
+  {
+    startDate: '21/10/2013',
+    endDate: '26/10/2013',
+    weekData: {
+      mon: { openPanna: '690', jodi: '51', closePanna: '290' },
+      tue: { openPanna: '370', jodi: '03', closePanna: '157' },
+      wed: { openPanna: '348', jodi: '52', closePanna: '237' },
+      thu: { openPanna: '178', jodi: '68', closePanna: '260' },
+      fri: { openPanna: '679', jodi: '26', closePanna: '114' },
+      sat: { openPanna: '578', jodi: '03', closePanna: '346' },
+      sun: { openPanna: '', jodi: '', closePanna: '' }
+    }
   }
 ];
