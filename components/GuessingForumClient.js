@@ -430,8 +430,8 @@ const postFormRef = useRef(null);
 
 </div>
       </div>
+      <Footer />
     </div>
-<Footer />
 
   );
     }
