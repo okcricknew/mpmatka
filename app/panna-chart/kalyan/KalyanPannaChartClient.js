@@ -217,7 +217,7 @@ export default function KalyanPannaChartClient({ initialIsAdmin, initialRows }) 
     <main className="min-h-screen bg-gray-100 p-1 sm:p-3 font-sans flex flex-col items-center">
     <div ref={topRef} />
     {/* GO TO BOTTOM BUTTON */}
-        <div className="w-full bg-black py-1.5 px-2 flex justify-center items-center border-b-2 border-yellow-400">
+        <div className="w-full py-1 px-2 flex justify-center items-center">
           <button
             onClick={scrollToBottom}
             className="bg-yellow-400 hover:bg-yellow-500 text-red-600 border-2 border-red-600 px-4 py-1 text-sm sm:text-base font-black italic uppercase tracking-wider shadow rounded transition"
@@ -426,8 +426,9 @@ export default function KalyanPannaChartClient({ initialIsAdmin, initialRows }) 
             </div>
           </div>
         )}
+      </div>
           {/* GO TO TOP BUTTON */}
-        <div className="w-full bg-black py-1.5 px-2 flex justify-center items-center border-t-2 border-yellow-400 mt-1">
+        <div className="py-1 px-2 flex justify-center items-center">
           <button
             onClick={scrollToTop}
             className="bg-yellow-400 hover:bg-yellow-500 text-red-600 border-2 border-red-600 px-4 py-1 text-sm sm:text-base font-black italic uppercase tracking-wider shadow rounded transition"
@@ -435,8 +436,6 @@ export default function KalyanPannaChartClient({ initialIsAdmin, initialRows }) 
             Go to Top
           </button>
         </div>
-
-      </div>
           <div ref={bottomRef} />
           
     </main>
