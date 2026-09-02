@@ -321,7 +321,7 @@ const postFormRef = useRef(null);
 
                   <div className="bg-white px-1 pt-8 pb-3 text-center">
                     {showOriginalPosts && hasQuotes && (
-                      <div className="bg-[#00ffff] w-full p-4 mb-3 text-center">
+                      <div className="bg-[#00ffff] w-full p-4 mb-1 text-center">
                         {post.quotes.map((q, idx) => (
                           <div key={`user-${idx}`} className="text-[#ff0000] italic text-sm my-1 font-semibold">
                             Originally Posted By: <span className="uppercase">{q.username}</span>
@@ -337,7 +337,7 @@ const postFormRef = useRef(null);
                       </div>
                     )}
 
-                    <div className="w-full py-2 px-1 flex justify-center items-center">
+                    <div className="w-full py-0 px-1 flex justify-center items-center">
                       <div className="text-black text-sm whitespace-pre-wrap leading-relaxed text-center inline-block font-semibold">
                         {post.guess}
                       </div>
