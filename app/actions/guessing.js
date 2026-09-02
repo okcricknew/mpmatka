@@ -244,17 +244,24 @@ export async function createGuessPost(formData) {
 
     const structuredData = parseGuessText(guessText);
 
-    await db.collection("guessing_posts").add({
-      userId: user.uid,
-      username: user.username || "USER",
-      guess: guessText,
-      parsedData: structuredData,
-      quotes: updatedQuotes,
-      createdAt: new Date()
-    });
+    const newPostRef = await db.collection("guessing_posts").add({
+  userId: user.uid,
+  username: user.username || "USER",
+  guess: guessText,
+  parsedData: structuredData,
+  quotes: updatedQuotes,
+  createdAt: new Date()
+});
 
-    revalidatePath("/guessing-forum");
-    return { success: true };
+revalidatePath("/guessing-forum");
+
+// New post save hone ke baad Page 1 dobara fetch karo
+const firstPageResult = await getGuessingForumPage(null);
+
+return {
+  success: true,
+  firstPage: firstPageResult
+};
   } catch (err) {
     console.error("createGuessPost error:", err);
     return { error: err.message };
