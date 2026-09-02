@@ -206,6 +206,7 @@ const postFormRef = useRef(null);
   const scrollToBottom = () => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: "smooth" });
 
   return (
+    <>
     <div className="w-full mt-2 bg-white font-sans text-sm">
       <div className="bg-yellow-400 text-black text-center py-2 font-black text-sm border-b border-orange-400 uppercase tracking-wider">
         * GUESSING FORUM *
@@ -430,8 +431,9 @@ const postFormRef = useRef(null);
 
 </div>
       </div>
+      </div>
       <Footer />
-    </div>
+</>
 
   );
     }
