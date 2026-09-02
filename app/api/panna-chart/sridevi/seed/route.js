@@ -52,7 +52,7 @@ export async function POST() {
     let operationCount = 0;
     let savedCount = 0;
 
-    for (const row of kalyanSeedData) {
+    for (const row of SrideviSeedData) {
       if (!row?.startDate || !row?.endDate) {
         continue;
       }
