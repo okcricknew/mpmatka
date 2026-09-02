@@ -114,7 +114,7 @@ export default function SrideviPannaChartClient({ initialIsAdmin, initialRows })
     if (!isAdmin) return;
 
     const confirmed = window.confirm(
-      'Are you sure you want to import ALL Kalyan seed data into Firebase?'
+      'Are you sure you want to import ALL Sridevi seed data into Firebase?'
     );
 
     if (!confirmed) return;
@@ -122,7 +122,7 @@ export default function SrideviPannaChartClient({ initialIsAdmin, initialRows })
     setLoading(true);
 
     try {
-      const response = await fetch('/api/panna-chart/kalyan/seed', {
+      const response = await fetch('/api/panna-chart/sridevi/seed', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -163,7 +163,7 @@ export default function SrideviPannaChartClient({ initialIsAdmin, initialRows })
 
     setLoading(true);
     try {
-      const response = await fetch('/api/panna-chart/kalyan', {
+      const response = await fetch('/api/panna-chart/sridevi', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -210,7 +210,7 @@ export default function SrideviPannaChartClient({ initialIsAdmin, initialRows })
         <div className="bg-yellow-400 py-2 border-b-2 border-black flex justify-center items-center px-3">
           <div className="text-center">
             <h1 className="text-red-600 text-xl sm:text-3xl font-black italic tracking-wider uppercase">
-              Kalyan Panna Chart
+              Sridevi Panna Chart
             </h1>
           </div>
         </div>
