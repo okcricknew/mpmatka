@@ -55,7 +55,7 @@ function RenderJodi({ jodiStr }) {
   );
 }
 
-export default function KalyanPannaChartClient({ initialIsAdmin, initialRows }) {
+export default function SrideviPannaChartClient({ initialIsAdmin, initialRows }) {
   const [chartRows, setChartRows] = useState(initialRows || []);
   const [isAdmin] = useState(initialIsAdmin);
   const [loading, setLoading] = useState(false);
