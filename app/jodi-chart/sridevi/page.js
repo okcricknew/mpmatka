@@ -49,7 +49,7 @@ export default async function SrideviJodiChartPage() {
             jodi: cleanValue(data.weekData?.sat?.jodi),
           },
           sun: {
-            jodi: cleanValue(data.weekData?.sat?.jodi),
+            jodi: cleanValue(data.weekData?.sun?.jodi),
           },
         },
       };
