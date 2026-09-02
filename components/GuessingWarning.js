@@ -16,7 +16,7 @@ export default function GuessingWarning() {
       {rules.map((rule, index) => (
         <div 
           key={index} 
-          className="py-3 px-4 text-center border-b border-gray-300 last:border-b-0"
+          className="py-1 px-4 text-center border-b border-gray-300 last:border-b-0"
         >
           <span className="text-red-600 font-bold text-base mr-1">
             {index + 1} »
