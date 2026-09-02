@@ -1,7 +1,7 @@
 // app/panna-chart/kalyan/KalyanPannaChartClient.js
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 
 function parseDateStr(dateStr) {
@@ -75,6 +75,19 @@ export default function KalyanPannaChartClient({ initialIsAdmin, initialRows }) 
   });
 
   const router = useRouter();
+
+    // Scroll reference aur functions
+  const topRef = useRef(null);
+  const bottomRef = useRef(null);
+
+  const scrollToTop = () => {
+    topRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const scrollToBottom = () => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+  
 
   useEffect(() => {
     setChartRows(initialRows || []);
@@ -202,7 +215,18 @@ export default function KalyanPannaChartClient({ initialIsAdmin, initialRows }) 
 
   return (
     <main className="min-h-screen bg-gray-100 p-1 sm:p-3 font-sans flex flex-col items-center">
+    <div ref={topRef} />
       <div className="w-full max-w-4xl mx-auto my-1 border-2 border-red-800 bg-yellow-400 p-0.5 shadow-md">
+            {/* GO TO BOTTOM BUTTON */}
+        <div className="w-full bg-black py-1.5 px-2 flex justify-center items-center border-b-2 border-yellow-400">
+          <button
+            onClick={scrollToBottom}
+            className="bg-yellow-400 hover:bg-yellow-500 text-red-600 border-2 border-red-600 px-4 py-1 text-sm sm:text-base font-black italic uppercase tracking-wider shadow rounded transition"
+          >
+            Go to Bottom
+          </button>
+        </div>
+              
         
         <div className="bg-yellow-400 py-2 border-b-2 border-black flex justify-center items-center px-3">
           <div className="text-center">
@@ -265,6 +289,16 @@ export default function KalyanPannaChartClient({ initialIsAdmin, initialRows }) 
             )}
           </div>
         </div>
+        {/* GO TO TOP BUTTON */}
+        <div className="w-full bg-black py-1.5 px-2 flex justify-center items-center border-t-2 border-yellow-400 mt-1">
+          <button
+            onClick={scrollToTop}
+            className="bg-yellow-400 hover:bg-yellow-500 text-red-600 border-2 border-red-600 px-4 py-1 text-sm sm:text-base font-black italic uppercase tracking-wider shadow rounded transition"
+          >
+            Go to Top
+          </button>
+        </div>
+
 
         {/* Admin Controls Moved to the Bottom */}
         {isAdmin && (
@@ -405,6 +439,8 @@ export default function KalyanPannaChartClient({ initialIsAdmin, initialRows }) 
         )}
 
       </div>
+          <div ref={bottomRef} />
+          
     </main>
   );
 }
