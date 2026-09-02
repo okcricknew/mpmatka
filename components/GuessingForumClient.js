@@ -321,7 +321,7 @@ const postFormRef = useRef(null);
 
                   <div className="bg-white px-1 pt-8 pb-3 text-center">
                     {showOriginalPosts && hasQuotes && (
-                      <div className="bg-[#00ffff] w-full p-4 mb-1 text-center">
+                      <div className="bg-[#00ffff] w-full p-4 mb-0 text-center">
                         {post.quotes.map((q, idx) => (
                           <div key={`user-${idx}`} className="text-[#ff0000] italic text-sm my-1 font-semibold">
                             Originally Posted By: <span className="uppercase">{q.username}</span>
