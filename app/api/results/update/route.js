@@ -71,15 +71,18 @@ ${result.trim()}
       });
     }
 
-    return NextResponse.json({
-      success: true,
-      result: {
-        name,
-        result: result || "140-55-140",
-        time: time || "",
-        message: message || "",
-      },
-    });
+    const savedDoc = await docRef.get();
+const savedData = savedDoc.data();
+
+return NextResponse.json({
+  success: true,
+  result: {
+    name: savedData.name || name,
+    result: savedData.result || "",
+    time: savedData.time || "",
+    message: savedData.message || "",
+  },
+});
   } catch (error) {
     console.error("Update result error:", error);
     return NextResponse.json(
