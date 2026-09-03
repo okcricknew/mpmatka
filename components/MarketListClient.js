@@ -152,8 +152,8 @@ export default function MarketListClient({
                 : "bg-white"
             }`}
           >
-            {/* Top Section: Jodi, Market Name & Result, Pannel */}
-            <div className="w-full flex justify-between items-center">
+            {/* Top Section with Market Name, Result & Time aligned with Jodi/Pannel buttons */}
+            <div className="w-full flex justify-between items-end">
               {/* JODI */}
               <button
                 onClick={() =>
@@ -164,15 +164,19 @@ export default function MarketListClient({
                 JODI
               </button>
 
-              {/* CENTER */}
+              {/* CENTER MARKET INFO */}
               <div className="text-center flex-1 mx-1">
                 <h3 className="font-bold text-[25px] text-black tracking-wide">
                   {item.name}
                 </h3>
 
-                <p className="text-red-600 font-extrabold text-[22px] tracking-widest mb-0">
+                <p className="text-red-600 font-extrabold text-[22px] tracking-widest mb-0 relative -top-2">
                   {displayResult}
                 </p>
+
+                <span className="text-[16px] text-black font-semibold">
+                  ({displayTime})
+                </span>
               </div>
 
               {/* PANEL */}
@@ -186,21 +190,14 @@ export default function MarketListClient({
               </button>
             </div>
 
-            {/* FULL WIDTH MESSAGE */}
+            {/* FULL WIDTH MESSAGE (Ab yeh Market Name aur Time ke beech me full width mein aayega) */}
             {liveData.message && (
-              <div className="w-full text-center my-1.5">
+              <div className="w-full text-center my-2">
                 <p className="text-[24px] text-black italic font-bold leading-tight whitespace-pre-line drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.5)]">
                   {liveData.message}
                 </p>
               </div>
             )}
-
-            {/* TIME SECTION */}
-            <div className="text-center mt-1">
-              <span className="text-[16px] text-black font-semibold">
-                ({displayTime})
-              </span>
-            </div>
 
             {/* SEPARATE UPDATE BUTTONS - Result aur Message ke liye alag-alag */}
             {isAdmin && ( 
@@ -314,5 +311,4 @@ export default function MarketListClient({
     </div>
         </div>
   );
-                  }
-                        
+        }
