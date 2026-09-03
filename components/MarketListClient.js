@@ -146,52 +146,52 @@ export default function MarketListClient({
         return (
           <div
             key={item.id}
-            className={`w-full border-b border-gray-300 py-2.5 px-3 relative ${
+            className={`w-full border-b border-gray-300 py-2.5 px-3 relative min-h-[90px] ${
               isHighlighted
                 ? "bg-yellow-300"
                 : "bg-white"
             }`}
           >
-            <div className="w-full flex justify-between items-end">
-              {/* JODI */}
+            {/* JODI - Absolute left */}
+            <div className="absolute left-3 top-3">
               <button
                 onClick={() =>
                   handleNavigation(item.name, "jodi")
                 }
-                className="bg-blue-900 hover:bg-blue-800 text-white text-[10px] font-bold px-3.5 py-1 rounded-full border border-blue-950 shadow-sm z-10"
+                className="bg-blue-900 hover:bg-blue-800 text-white text-[10px] font-bold px-3.5 py-1 rounded-full border border-blue-950 shadow-sm"
               >
                 JODI
               </button>
+            </div>
 
-              {/* CENTER */}
-              <div className="text-center w-full px-12">
-                <h3 className="font-bold text-[25px] text-black tracking-wide">
-                  {item.name}
-                </h3>
+            {/* CENTER - Poori width lega jisse message bhi full width ho jayega */}
+            <div className="text-center w-full px-14">
+              <h3 className="font-bold text-[25px] text-black tracking-wide">
+                {item.name}
+              </h3>
 
-                <p className="text-red-600 font-extrabold text-[22px] tracking-widest mb-0 relative -top-2">
-                  {displayResult}
+              <p className="text-red-600 font-extrabold text-[22px] tracking-widest mb-0">
+                {displayResult}
+              </p>
+
+              {liveData.message && (
+                <p className="w-full text-[24px] text-black italic font-bold leading-tight whitespace-pre-line my-1 drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.5)] bg-black/5 rounded">
+                  {liveData.message}
                 </p>
+              )}
 
-                {liveData.message && (
-                    <div className="w-full my-1">
-                      <p className="w-full text-[24px] text-black italic font-bold leading-tight whitespace-pre-line drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.5)] bg-black/5 py-1 rounded">
-                      {liveData.message}
-                    </p>
-                  </div>
-                )}
+              <span className="text-[16px] text-black font-semibold">
+                ({displayTime})
+              </span>
+            </div>
 
-                <span className="text-[16px] text-black font-semibold">
-                  ({displayTime})
-                </span>
-              </div>
-
-              {/* PANEL */}
+            {/* PANEL - Absolute right */}
+            <div className="absolute right-3 top-3">
               <button
                 onClick={() =>
                   handleNavigation(item.name, "panna")
                 }
-                className="bg-blue-900 hover:bg-blue-800 text-white text-[10px] font-bold px-3.5 py-1 rounded-full border border-blue-950 shadow-sm z-10"
+                className="bg-blue-900 hover:bg-blue-800 text-white text-[10px] font-bold px-3.5 py-1 rounded-full border border-blue-950 shadow-sm"
               >
                 PANNEL
               </button>
@@ -307,6 +307,7 @@ export default function MarketListClient({
         </div>
       )}
     </div>
-        </div>
+    </div>
   );
-                    }
+                        }
+                      
