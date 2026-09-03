@@ -174,7 +174,7 @@ export default function MarketListClient({
               </div>
 
               {/* BOTTOM ROW: Jodi & Panel Buttons */}
-              <div className="w-full flex justify-between items-center -mt-6 px-1">
+              <div className="w-full flex justify-between items-center -mt-9 px-1">
                 <button
                   onClick={() =>
                     handleNavigation(item.name, "jodi")
