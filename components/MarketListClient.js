@@ -144,7 +144,7 @@ export default function MarketListClient({
           return (
             <div
               key={item.id}
-              className={`w-full border-b border-gray-300 py-3 px-3 ${
+              className={`w-full border-b border-gray-300 py-1 px-3 ${
                 isHighlighted
                   ? "bg-yellow-300"
                   : "bg-white"
@@ -156,7 +156,7 @@ export default function MarketListClient({
                   {item.name}
                 </h3>
 
-                <p className="text-red-600 font-extrabold text-[20px] tracking-widest my-1">
+                <p className="text-red-600 font-extrabold text-[20px] tracking-widest mt-0 mb-0">
                   {displayResult}
                 </p>
 
@@ -174,7 +174,7 @@ export default function MarketListClient({
               </div>
 
               {/* BOTTOM ROW: Jodi & Panel Buttons */}
-              <div className="w-full flex justify-between items-center mt-2 px-1">
+              <div className="w-full flex justify-between items-center mt-0 px-1">
                 <button
                   onClick={() =>
                     handleNavigation(item.name, "jodi")
