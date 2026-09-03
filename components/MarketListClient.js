@@ -152,7 +152,6 @@ export default function MarketListClient({
                 : "bg-white"
             }`}
           >
-            {/* Top Section with Jodi, Market Name, Result & Pannel */}
             <div className="w-full flex justify-between items-end">
               {/* JODI */}
               <button
@@ -164,7 +163,7 @@ export default function MarketListClient({
                 JODI
               </button>
 
-              {/* CENTER MARKET DETAILS */}
+              {/* CENTER */}
               <div className="text-center flex-1 mx-1">
                 <h3 className="font-bold text-[25px] text-black tracking-wide">
                   {item.name}
@@ -173,6 +172,16 @@ export default function MarketListClient({
                 <p className="text-red-600 font-extrabold text-[22px] tracking-widest mb-0 relative -top-2">
                   {displayResult}
                 </p>
+
+                {liveData.message && (
+                    <p className="text-[24px] text-black italic font-bold leading-tight whitespace-pre-line mb-1 drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.5)]">
+                    {liveData.message}
+                  </p>
+                )}
+
+                <span className="text-[16px] text-black font-semibold">
+                  ({displayTime})
+                </span>
               </div>
 
               {/* PANEL */}
@@ -184,22 +193,6 @@ export default function MarketListClient({
               >
                 PANNEL
               </button>
-            </div>
-
-            {/* FULL WIDTH MESSAGE (Ab ye parent container ke andar poori screen width me fail kar aayega, result aur time ke beech me) */}
-            {liveData.message && (
-              <div className="w-full text-center my-1.5">
-                <p className="text-[24px] text-black italic font-bold leading-tight whitespace-pre-line drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.5)]">
-                  {liveData.message}
-                </p>
-              </div>
-            )}
-
-            {/* TIME SECTION (Jodi/Pannel ke level ko affect kiye bina alag row me centered) */}
-            <div className="text-center mt-0.5">
-              <span className="text-[16px] text-black font-semibold">
-                ({displayTime})
-              </span>
             </div>
 
             {/* SEPARATE UPDATE BUTTONS - Result aur Message ke liye alag-alag */}
@@ -314,4 +307,4 @@ export default function MarketListClient({
     </div>
         </div>
   );
-                  }
+                        }
