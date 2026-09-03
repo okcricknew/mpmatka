@@ -164,7 +164,7 @@ export default function MarketListClient({
               </button>
 
               {/* CENTER */}
-              <div className="text-center flex-1 mx-1">
+              <div className="text-center flex-1 mx-1 relative">
                 <h3 className="font-bold text-[25px] text-black tracking-wide">
                   {item.name}
                 </h3>
@@ -174,12 +174,12 @@ export default function MarketListClient({
                 </p>
 
                 {liveData.message && (
-                    <p className="absolute left-0 right-0 w-full text-center text-[24px] text-black italic font-bold leading-tight whitespace-pre-line mb-1 drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.5)]">
+                    <div className="absolute left-0 right-0 w-full text-center text-[20px] sm:text-[22px] text-black italic font-bold leading-snug whitespace-pre-line z-10 bg-inherit py-0.5 shadow-[0_1.2px_1.2px_rgba(0,0,0,0.5)]">
                     {liveData.message}
-                  </p>
+                  </div>
                 )}
 
-                <span className="text-[16px] text-black font-semibold">
+                <span className="text-[16px] text-black font-semibold block mt-1">
                   ({displayTime})
                 </span>
               </div>
@@ -206,7 +206,7 @@ export default function MarketListClient({
                 </button>
                 <button
                   onClick={() => handleOpenModal(item, "message")}
-                  className="bg-purple-700 hover:bg-purple-800 text-white text-[10px] font-bold px-3 py-1 rounded border border-purple-900"
+                  className="bg-purple-700 hover:bg-purple-800 text-white text-[10px] font-bold px3 py-1 rounded border border-purple-900"
                 >
                   💬 UPDATE MSG
                 </button>
@@ -307,4 +307,4 @@ export default function MarketListClient({
     </div>
         </div>
   );
-                        }
+}
