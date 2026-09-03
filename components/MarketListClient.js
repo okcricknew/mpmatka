@@ -152,7 +152,7 @@ export default function MarketListClient({
                 : "bg-white"
             }`}
           >
-            {/* Top Section with Market Name, Result & Time aligned with Jodi/Pannel buttons */}
+            {/* Main Row jisme Jodi, Center Details aur Pannel ek hi line mein hain */}
             <div className="w-full flex justify-between items-end">
               {/* JODI */}
               <button
@@ -164,7 +164,7 @@ export default function MarketListClient({
                 JODI
               </button>
 
-              {/* CENTER MARKET INFO */}
+              {/* CENTER MARKET DETAILS (Market Name -> Result -> Message -> Time) */}
               <div className="text-center flex-1 mx-1">
                 <h3 className="font-bold text-[25px] text-black tracking-wide">
                   {item.name}
@@ -173,6 +173,13 @@ export default function MarketListClient({
                 <p className="text-red-600 font-extrabold text-[22px] tracking-widest mb-0 relative -top-2">
                   {displayResult}
                 </p>
+
+                {/* FULL WIDTH MESSAGE Wahi purani jagah par (Result aur Time ke beech) */}
+                {liveData.message && (
+                  <p className="w-full text-[24px] text-black italic font-bold leading-tight whitespace-pre-line my-1 drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.5)]">
+                    {liveData.message}
+                  </p>
+                )}
 
                 <span className="text-[16px] text-black font-semibold">
                   ({displayTime})
@@ -189,15 +196,6 @@ export default function MarketListClient({
                 PANNEL
               </button>
             </div>
-
-            {/* FULL WIDTH MESSAGE (Ab yeh Market Name aur Time ke beech me full width mein aayega) */}
-            {liveData.message && (
-              <div className="w-full text-center my-2">
-                <p className="text-[24px] text-black italic font-bold leading-tight whitespace-pre-line drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.5)]">
-                  {liveData.message}
-                </p>
-              </div>
-            )}
 
             {/* SEPARATE UPDATE BUTTONS - Result aur Message ke liye alag-alag */}
             {isAdmin && ( 
@@ -311,4 +309,4 @@ export default function MarketListClient({
     </div>
         </div>
   );
-        }
+                }
