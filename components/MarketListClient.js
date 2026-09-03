@@ -150,8 +150,31 @@ export default function MarketListClient({
                   : "bg-white"
               }`}
             >
-              <div className="w-full flex justify-between items-center">
-                {/* JODI */}
+              {/* EXACT FLOW: Market Name -> Result -> Message -> Time */}
+              <div className="text-center w-full">
+                <h3 className="font-bold text-[22px] text-blue-900 tracking-wide uppercase">
+                  {item.name}
+                </h3>
+
+                <p className="text-red-600 font-extrabold text-[20px] tracking-widest my-1">
+                  {displayResult}
+                </p>
+
+                {liveData.message && (
+                  <div className="w-full my-2">
+                    <p className="w-full text-[15px] sm:text-[16px] text-black italic font-bold leading-snug whitespace-pre-line text-center px-2">
+                      {liveData.message}
+                    </p>
+                  </div>
+                )}
+
+                <span className="text-[15px] text-black font-bold block my-1">
+                  ({displayTime})
+                </span>
+              </div>
+
+              {/* BOTTOM ROW: Jodi & Panel Buttons */}
+              <div className="w-full flex justify-between items-center mt-2 px-1">
                 <button
                   onClick={() =>
                     handleNavigation(item.name, "jodi")
@@ -161,22 +184,6 @@ export default function MarketListClient({
                   Jodi
                 </button>
 
-                {/* CENTER */}
-                <div className="text-center flex-1 mx-2">
-                  <h3 className="font-bold text-[22px] text-blue-900 tracking-wide uppercase">
-                    {item.name}
-                  </h3>
-
-                  <p className="text-red-600 font-extrabold text-[20px] tracking-widest my-0.5">
-                    {displayResult}
-                  </p>
-
-                  <span className="text-[15px] text-black font-bold">
-                    ({displayTime})
-                  </span>
-                </div>
-
-                {/* PANEL */}
                 <button
                   onClick={() =>
                     handleNavigation(item.name, "panna")
@@ -187,16 +194,7 @@ export default function MarketListClient({
                 </button>
               </div>
 
-              {/* MESSAGE FULL WIDTH SECTION */}
-              {liveData.message && (
-                <div className="w-full mt-2.5">
-                  <p className="w-full text-[15px] sm:text-[16px] text-black italic font-bold leading-snug whitespace-pre-line text-center px-2">
-                    {liveData.message}
-                  </p>
-                </div>
-              )}
-
-              {/* SEPARATE UPDATE BUTTONS - Result aur Message ke liye alag-alag */}
+              {/* ADMIN UPDATE BUTTONS */}
               {isAdmin && ( 
                 <div className="flex justify-center gap-2 mt-2">
                   <button
@@ -308,5 +306,5 @@ export default function MarketListClient({
       </div>
     </div>
   );
-                    }
-                          
+                  }
+                        
