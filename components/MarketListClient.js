@@ -174,9 +174,11 @@ export default function MarketListClient({
                 </p>
 
                 {liveData.message && (
-                    <p className="relative left-1/2 -translate-x-1/2 w-screen text-center text-[24px] text-black italic font-bold leading-tight whitespace-pre-line mb-1 drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.5)]">
-  {liveData.message}
-</p>
+                    <div className="w-full px-1">
+                      <p className="w-full text-[24px] text-black italic font-bold leading-tight whitespace-pre-line mb-1 drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.5)] text-center break-words">
+                      {liveData.message}
+                    </p>
+                  </div>
                 )}
 
                 <span className="text-[16px] text-black font-semibold">
@@ -265,7 +267,7 @@ export default function MarketListClient({
               )}
 
               {/* Sirf Message dikhega agar Message button dabaya hai */}
-              {updateType === "message" && (
+              {updateType === "message`" && (
                 <div>
                   <label className="block text-xs font-bold text-black mb-1">
                     Message
