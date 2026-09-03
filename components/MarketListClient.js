@@ -151,26 +151,35 @@ export default function MarketListClient({
                   : "bg-white"
               }`}
             >
-              <div className="w-full flex justify-between items-end">
+              <div className="w-full flex justify-between items-center">
                 {/* JODI */}
                 <button
                   onClick={() =>
                     handleNavigation(item.name, "jodi")
                   }
-                  className="bg-blue-900 hover:bg-blue-800 text-white text-[10px] font-bold px-3.5 py-1 rounded-full border border-blue-950 shadow-sm"
+                  className="bg-blue-900 hover:bg-blue-800 text-white text-[10px] font-bold px-3.5 py-1 rounded-full border border-blue-950 shadow-sm self-end mb-1"
                 >
                   JODI
                 </button>
 
-                {/* CENTER */}
-                <div className="text-center flex-1 mx-1">
+                {/* CENTER - Wahi jagah jahan pehle tha, ab full width message ke sath */}
+                <div className="text-center flex-1 mx-2">
                   <h3 className="font-bold text-[25px] text-black tracking-wide">
                     {item.name}
                   </h3>
 
-                  <p className="text-red-600 font-extrabold text-[22px] tracking-widest mb-0 relative -top-2">
+                  <p className="text-red-600 font-extrabold text-[22px] tracking-widest mb-0">
                     {displayResult}
                   </p>
+
+                  {/* MESSAGE - Bilkul usi jagah par full width display */}
+                  {liveData.message && (
+                    <div className="w-full my-1">
+                      <p className="text-[22px] text-black italic font-bold leading-tight whitespace-pre-line drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.5)] bg-black/5 px-2 py-1 rounded">
+                        {liveData.message}
+                      </p>
+                    </div>
+                  )}
 
                   <span className="text-[16px] text-black font-semibold">
                     ({displayTime})
@@ -182,20 +191,11 @@ export default function MarketListClient({
                   onClick={() =>
                     handleNavigation(item.name, "panna")
                   }
-                  className="bg-blue-900 hover:bg-blue-800 text-white text-[10px] font-bold px-3.5 py-1 rounded-full border border-blue-950 shadow-sm"
+                  className="bg-blue-900 hover:bg-blue-800 text-white text-[10px] font-bold px-3.5 py-1 rounded-full border border-blue-950 shadow-sm self-end mb-1"
                 >
                   PANNEL
                 </button>
               </div>
-
-              {/* FULL WIDTH MESSAGE (Row ke andar alag se full width span karne ke liye) */}
-              {liveData.message && (
-                <div className="w-full text-center mt-2 px-1">
-                  <p className="text-[22px] text-black italic font-bold leading-tight whitespace-pre-line drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.5)] bg-black/5 py-1 rounded">
-                    {liveData.message}
-                  </p>
-                </div>
-              )}
 
               {/* SEPARATE UPDATE BUTTONS - Result aur Message ke liye alag-alag */}
               {isAdmin && ( 
@@ -306,4 +306,5 @@ export default function MarketListClient({
       </div>
     </div>
   );
-                          }
+                      }
+                  
