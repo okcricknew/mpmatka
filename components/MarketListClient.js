@@ -146,7 +146,7 @@ export default function MarketListClient({
         return (
           <div
             key={item.id}
-            className={`relative w-full border-b border-gray-300 py-2.5 px-3 ${
+            className={`w-full border-b border-gray-300 py-2.5 px-3 ${
               isHighlighted
                 ? "bg-yellow-300"
                 : "bg-white"
@@ -164,7 +164,7 @@ export default function MarketListClient({
               </button>
 
               {/* CENTER */}
-              <div className="text-center flex-1 mx-1 relative">
+              <div className="text-center flex-1 mx-1">
                 <h3 className="font-bold text-[25px] text-black tracking-wide">
                   {item.name}
                 </h3>
@@ -174,12 +174,12 @@ export default function MarketListClient({
                 </p>
 
                 {liveData.message && (
-                    <div className="absolute left-0 right-0 w-full text-center text-[20px] sm:text-[22px] text-black italic font-bold leading-snug whitespace-pre-line z-10 bg-inherit py-0.5 shadow-[0_1.2px_1.2px_rgba(0,0,0,0.5)]">
+                    <p className="text-[24px] text-black italic font-bold leading-tight whitespace-pre-line mb-1 drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.5)]">
                     {liveData.message}
-                  </div>
+                  </p>
                 )}
 
-                <span className="text-[16px] text-black font-semibold block mt-1">
+                <span className="text-[16px] text-black font-semibold">
                   ({displayTime})
                 </span>
               </div>
@@ -206,7 +206,7 @@ export default function MarketListClient({
                 </button>
                 <button
                   onClick={() => handleOpenModal(item, "message")}
-                  className="bg-purple-700 hover:bg-purple-800 text-white text-[10px] font-bold px3 py-1 rounded border border-purple-900"
+                  className="bg-purple-700 hover:bg-purple-800 text-white text-[10px] font-bold px-3 py-1 rounded border border-purple-900"
                 >
                   💬 UPDATE MSG
                 </button>
@@ -307,4 +307,4 @@ export default function MarketListClient({
     </div>
         </div>
   );
-}
+                }
