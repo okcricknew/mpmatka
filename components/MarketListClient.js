@@ -146,7 +146,7 @@ export default function MarketListClient({
         return (
           <div
             key={item.id}
-            className={`w-full border-b border-gray-300 py-2.5 px-3 ${
+            className={`relative w-full border-b border-gray-300 py-2.5 px-3 ${
               isHighlighted
                 ? "bg-yellow-300"
                 : "bg-white"
@@ -174,11 +174,9 @@ export default function MarketListClient({
                 </p>
 
                 {liveData.message && (
-                    <div className="w-full px-1">
-                      <p className="w-full text-[24px] text-black italic font-bold leading-tight whitespace-pre-line mb-1 drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.5)] text-center break-words">
-                      {liveData.message}
-                    </p>
-                  </div>
+                    <p className="absolute left-0 right-0 w-full text-center text-[24px] text-black italic font-bold leading-tight whitespace-pre-line mb-1 drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.5)]">
+                    {liveData.message}
+                  </p>
                 )}
 
                 <span className="text-[16px] text-black font-semibold">
@@ -267,7 +265,7 @@ export default function MarketListClient({
               )}
 
               {/* Sirf Message dikhega agar Message button dabaya hai */}
-              {updateType === "message`" && (
+              {updateType === "message" && (
                 <div>
                   <label className="block text-xs font-bold text-black mb-1">
                     Message
