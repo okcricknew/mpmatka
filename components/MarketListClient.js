@@ -173,9 +173,8 @@ export default function MarketListClient({
                   {displayResult}
                 </p>
 
-                {/* Yahan message ko block aur w-full de diya hai taaki ye bina buttons ko hidaye andar hi poori width le le */}
                 {liveData.message && (
-                  <p className="w-full block text-[24px] text-black italic font-bold leading-tight whitespace-pre-line my-1 drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.5)]">
+                    <p className="text-[24px] text-black italic font-bold leading-tight whitespace-pre-line mb-1 drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.5)]">
                     {liveData.message}
                   </p>
                 )}
