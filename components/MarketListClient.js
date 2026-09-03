@@ -152,6 +152,7 @@ export default function MarketListClient({
                 : "bg-white"
             }`}
           >
+            {/* Top row: Jodi, Market Name, Result & Pannel */}
             <div className="w-full flex justify-between items-end">
               {/* JODI */}
               <button
@@ -163,7 +164,7 @@ export default function MarketListClient({
                 JODI
               </button>
 
-              {/* CENTER */}
+              {/* CENTER MARKET NAME & RESULT */}
               <div className="text-center flex-1 mx-1">
                 <h3 className="font-bold text-[25px] text-black tracking-wide">
                   {item.name}
@@ -172,16 +173,6 @@ export default function MarketListClient({
                 <p className="text-red-600 font-extrabold text-[22px] tracking-widest mb-0 relative -top-2">
                   {displayResult}
                 </p>
-
-                {liveData.message && (
-                    <p className="text-[24px] text-black italic font-bold leading-tight whitespace-pre-line mb-1 drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.5)]">
-                    {liveData.message}
-                  </p>
-                )}
-
-                <span className="text-[16px] text-black font-semibold">
-                  ({displayTime})
-                </span>
               </div>
 
               {/* PANEL */}
@@ -193,6 +184,22 @@ export default function MarketListClient({
               >
                 PANNEL
               </button>
+            </div>
+
+            {/* FULL WIDTH MESSAGE - Screenshot ki tarah ye market container ke andar poori width mein aayega */}
+            {liveData.message && (
+              <div className="w-full text-center my-2">
+                <p className="text-[20px] text-black italic font-bold leading-snug whitespace-pre-line drop-shadow-[0_1px_1px_rgba(0,0,0,0.3)]">
+                  {liveData.message}
+                </p>
+              </div>
+            )}
+
+            {/* TIME SECTION - Original position par centered */}
+            <div className="text-center mt-1">
+              <span className="text-[16px] text-black font-semibold">
+                ({displayTime})
+              </span>
             </div>
 
             {/* SEPARATE UPDATE BUTTONS - Result aur Message ke liye alag-alag */}
@@ -307,4 +314,5 @@ export default function MarketListClient({
     </div>
         </div>
   );
-                        }
+                }
+              
