@@ -54,7 +54,7 @@ const STATIC_MARKETS = [
     name: 'RAJDHANI DAY',
     days: [1, 2, 3, 4, 5, 6],
     slots: [
-      { open: '15:10', close: '15:35' },
+      { open: '07:55', close: '08:05' },
       { open: '17:10', close: '17:35' }
     ]
   },
