@@ -27,8 +27,8 @@ const STATIC_MARKETS = [
     name: 'TIME BAZAR',
     days: [1, 2, 3, 4, 5, 6],
     slots: [
-      { open: '12:45', close: '13:20' },
-      { open: '13:45', close: '14:20' }
+      { open: '07:45', close: '07:55' },
+      { open: '08:05', close: '08:15' }
     ]
   },
   {
