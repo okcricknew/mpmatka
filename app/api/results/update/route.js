@@ -71,18 +71,27 @@ ${result.trim()}
       });
     }
 
-    const savedDoc = await docRef.get();
-const savedData = savedDoc.data();
+    if (updateType === "result") {
+  return NextResponse.json({
+    success: true,
+    result: {
+      result: result?.trim() || "140-55-140",
+      time: time?.trim() || "",
+    },
+  });
+}
 
-return NextResponse.json({
-  success: true,
-  result: {
-    name: savedData.name || name,
-    result: savedData.result || "",
-    time: savedData.time || "",
-    message: savedData.message || "",
-  },
-});
+if (updateType === "message") {
+  return NextResponse.json({
+    success: true,
+    message: message?.trim() || "",
+  });
+}
+
+return NextResponse.json(
+  { error: "Invalid update type" },
+  { status: 400 }
+);
   } catch (error) {
     console.error("Update result error:", error);
     return NextResponse.json(
