@@ -32,12 +32,12 @@ export async function POST(request) {
 
     const updatePayload = {
   name,
-  updatedAt: FieldValue.serverTimestamp(),
 };
 
 if (updateType === "result") {
   updatePayload.result = result?.trim() || "140-55-140";
   updatePayload.time = time?.trim() || "";
+  updatePayload.updatedAt = FieldValue.serverTimestamp();
 }
 
 if (updateType === "message") {
