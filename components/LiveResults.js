@@ -63,7 +63,7 @@ const STATIC_MARKETS = [
     name: 'SUPREME DAY',
     days: [1, 2, 3, 4, 5, 6],
     slots: [
-      { open: '15:35', close: '17:35' }
+      { open: '08:20', close: '08:35' }
     ]
   },
   {
