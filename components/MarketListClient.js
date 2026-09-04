@@ -105,13 +105,14 @@ setMarketResults((prev) => ({
   ...prev,
   [marketName]: {
     ...prev[marketName],
+
     ...(updateType === "result"
       ? {
           result: data.result.result,
           time: data.result.time,
         }
       : {
-          message: data.result.message,
+          message: data.message,
         }),
   },
 }));
