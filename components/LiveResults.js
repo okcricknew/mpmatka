@@ -45,7 +45,7 @@ const STATIC_MARKETS = [
     name: 'MILAN DAY',
     days: [1, 2, 3, 4, 5, 6],
     slots: [
-      { open: '14:50', close: '15:30' },
+      { open: '07:52', close: '07:58' },
       { open: '16:50', close: '17:30' }
     ]
   },
