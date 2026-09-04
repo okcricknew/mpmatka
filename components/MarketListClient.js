@@ -173,7 +173,7 @@ setMarketResults((prev) => ({
 
                 {liveData.message && (
                   <div className="w-full my-2">
-                    <p className="w-full text-[15px] sm:text-[16px] text-black italic font-bold leading-snug whitespace-pre-line text-center px-2">
+                    <p className="w-full text-[22px] sm:text-[26px] text-black italic font-bold leading-snug whitespace-pre-line text-center px-2">
                       {liveData.message}
                     </p>
                   </div>
