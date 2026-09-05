@@ -23,7 +23,6 @@ export default function GuessingForumClient({
 const [quotingPost, setQuotingPost] = useState(null);
 const [loading, setLoading] = useState(false);
 const [showOriginalPosts, setShowOriginalPosts] = useState(true);
-  const [selectedUserId, setSelectedUserId] = useState(null);
 const [posts, setPosts] = useState(initialPosts || []);
 const [currentPage, setCurrentPage] = useState(1);
 const [pageCursors, setPageCursors] = useState({
@@ -306,16 +305,8 @@ const postFormRef = useRef(null);
           </div>
         ) : (
           posts
-  .filter((post) => {
-    // User filter active hai to sirf us user ke ORIGINAL posts
-    if (selectedUserId) {
-      return post.userId === selectedUserId;
-    }
-
-    // Existing Show Original Posts behaviour
-    return showOriginalPosts || !post.quotes?.length;
-  })
-  .map((post) => {
+            .filter((post) => showOriginalPosts || !post.quotes?.length)
+            .map((post) => {
               const hasQuotes = post.quotes && post.quotes.length > 0;
               return (
                 <div key={post.id} className="w-full bg-white border-[3px] border-orange-400 shadow-sm [border-style:groove]">
@@ -323,16 +314,9 @@ const postFormRef = useRef(null);
                     <div className="bg-[#00b000] text-[#ffff00] py-1.5 px-2 flex items-center justify-start text-sm border-r-2 border-orange-400 [border-style:groove]">
                       {formatTimestamp(post.createdAt)}
                     </div>
-                    <div
-  onClick={() => {
-    setSelectedUserId(
-      selectedUserId === post.userId ? null : post.userId
-    );
-  }}
-  className="bg-white text-[#cc0000] py-1.5 px-2 flex items-center justify-center text-sm font-extrabold underline uppercase cursor-pointer hover:bg-yellow-100"
->
-  {post.username || "USER"}
-</div>
+                    <div className="bg-white text-[#cc0000] py-1.5 px-2 flex items-center justify-center text-sm font-extrabold underline uppercase">
+                      {post.username || "USER"}
+                    </div>
                   </div>
 
                   <div className="bg-white px-1 pt-8 pb-3 text-center">
