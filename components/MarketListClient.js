@@ -155,7 +155,7 @@ setMarketResults((prev) => ({
           return (
             <div
               key={item.id}
-              className={`w-full border-b border-gray-300 py-1 px-3 ${
+              className={`w-full border-b border-black-300 py-1 px-3 ${
                 isHighlighted
                   ? "bg-yellow-300"
                   : "bg-white"
