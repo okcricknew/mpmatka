@@ -1,6 +1,31 @@
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
+export const metadata = {
+  title: "Satta Matka | Satta Matka Results | Matka Satta",
+  description:
+    "Satta Matka, Satta Matta Matka Results, Matka Satta, Matka Result Satta and Satta Result Matka. Check the latest Matka results and updates.",
+  keywords: [
+    "satta matka",
+    "satta matta matka",
+    "satta matta matka results",
+    "satta matta matka result",
+    "matka satta",
+    "matka result satta",
+    "satta result matka",
+    "satta result matka result",
+    "matka satta final",
+    "matka satta final ank",
+    "satta matka satta matka",
+    "matka satta result chart",
+    "india matka satta"
+  ],
+  robots: {
+    index: true,
+    follow: true
+  }
+};
+
 import Header from "../components/Header";
 import Header1 from "../components/Header1";
 import Footer from "../components/Footer";
