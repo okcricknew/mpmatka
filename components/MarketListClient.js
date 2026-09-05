@@ -179,7 +179,7 @@ setMarketResults((prev) => ({
                   </div>
                 )}
 
-                <span className="text-[15px] text-black font-bold block my-1">
+                <span className="text-[15px] text-black font-bold block my-2">
                   ({displayTime})
                 </span>
               </div>
