@@ -167,7 +167,7 @@ setMarketResults((prev) => ({
                   {item.name}
                 </h3>
 
-                <p className="text-red-600 font-extrabold text-[20px] tracking-widest mt-0 mb-0">
+                <p className="text-red-600 font-extrabold text-[20px] tracking-widest -mt-1 mb-0">
                   {displayResult}
                 </p>
 
@@ -185,7 +185,7 @@ setMarketResults((prev) => ({
               </div>
 
               {/* BOTTOM ROW: Jodi & Panel Buttons */}
-              <div className="w-full flex justify-between items-center -mt-12 px-1">
+              <div className="w-full flex justify-between items-center -mt-10 px-1">
                 <button
                   onClick={() =>
                     handleNavigation(item.name, "jodi")
