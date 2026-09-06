@@ -338,7 +338,7 @@ const postFormRef = useRef(null);
                     )}
 
                     <div className="w-full py-2 px-1 flex justify-center items-center">
-                      <div className="text-black text-[7px] whitespace-pre-wrap leading-relaxed text-center inline-block font-semibold">
+                      <div className="text-black text-[22px] whitespace-pre-wrap leading-relaxed text-center inline-block font-semibold">
                         {post.guess}
                       </div>
                     </div>
